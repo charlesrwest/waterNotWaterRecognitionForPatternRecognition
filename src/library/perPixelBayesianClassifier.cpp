@@ -24,10 +24,10 @@ int64_t pixelCountInWaterImages = 0;
 int64_t waterPixelCountInNotWaterImages = 0;
 int64_t pixelCountInNotWaterImages = 0;
 
-printf("\n\nTraining\n");
+//printf("\n\nTraining\n");
 for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
 {
-printf("%s\n", iter->filename.c_str());
+//printf("%s\n", iter->filename.c_str());
 if(iter->isWaterImage)
 {
 waterImageCount++;
@@ -137,10 +137,10 @@ int64_t numberOfTestExamples = inputTrainingExamplesEndIterator - inputTrainingE
 int64_t numberOfFalsePositives = 0;
 int64_t numberOfFalseNegatives = 0;
 
-printf("\n\nTesting\n");
+//printf("\n\nTesting\n");
 for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
 {
-printf("%s\n", iter->filename.c_str());
+//printf("%s\n", iter->filename.c_str());
 bool classifiedAsNotWater = classify(*iter);
 
 if(!classifiedAsNotWater)
@@ -182,10 +182,10 @@ double falsePositiveRateSum = 0.0;
 double falseNegativeRateSum = 0.0;
 std::vector<cv::Mat_<bool>> segmentations;
 
-printf("\n\nSegmenting\n");
+//printf("\n\nSegmenting\n");
 for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
 {
-printf("%s\n", iter->filename.c_str());
+//printf("%s\n", iter->filename.c_str());
 
 double errorRate, falsePositiveRate, falseNegativeRate;
 cv::Mat_<bool> segmentation;
