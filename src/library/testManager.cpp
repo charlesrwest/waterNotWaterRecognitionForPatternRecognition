@@ -88,7 +88,6 @@ double classificationErrorRate, classificationFalsePositiveRate, classificationF
 
 std::tie(classificationErrorRate, classificationFalsePositiveRate, classificationFalseNegativeRate) = classifier.test(trainingDataEnd, trainingAndTestData.end());
 
-
 double pixelErrorRate, pixelFalsePositiveRate, pixelFalseNegativeRate;
 std::vector<cv::Mat_<bool>> classifierSegmentations;
 

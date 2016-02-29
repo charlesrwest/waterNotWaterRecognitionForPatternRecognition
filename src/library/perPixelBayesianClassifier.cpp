@@ -182,8 +182,11 @@ double falsePositiveRateSum = 0.0;
 double falseNegativeRateSum = 0.0;
 std::vector<cv::Mat_<bool>> segmentations;
 
+printf("\n\nSegmenting\n");
 for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
 {
+printf("%s\n", iter->filename.c_str());
+
 double errorRate, falsePositiveRate, falseNegativeRate;
 cv::Mat_<bool> segmentation;
 std::tie(segmentation, errorRate, falsePositiveRate, falseNegativeRate) = segment(*iter);
