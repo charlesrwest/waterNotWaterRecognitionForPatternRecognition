@@ -17,3 +17,5 @@ tempFile902e809843
 .directory
 ui_*
 .directory
+/data/*
+/output/*

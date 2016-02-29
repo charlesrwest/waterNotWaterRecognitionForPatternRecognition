@@ -36,6 +36,8 @@ FILE(GLOB SOURCEFILES ./src/library/*.cpp ./src/library/*.c ./jsoncpp/*.cpp)
 
 FILE(GLOB BITMAP_CREATOR_SOURCE_FILES ./src/executables/bitmapCreator/*.cpp ./src/executables/bitmapCreator/*.c)
 
+FILE(GLOB CLASSIFIER_EVALUATOR_SOURCE_FILES ./src/executables/classifierEvaluator/*.cpp ./src/executables/classifierEvaluator/*.c)
+
 #Set the binaries to be placed in the ./bin/ directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin/")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "lib/")
@@ -45,11 +47,16 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "lib/")
 add_library(patternRecognition SHARED  ${SOURCEFILES})
 
 #Tell CMake what executables to make
+
+ADD_EXECUTABLE(classifierEvaluator ${CLASSIFIER_EVALUATOR_SOURCE_FILES} ${CMAKE_CURRENT_BINARY_DIR}) 
+
 ADD_EXECUTABLE(bitmapCreator ${BITMAP_CREATOR_SOURCE_FILES} ${CMAKE_CURRENT_BINARY_DIR}) 
 
 target_link_libraries(patternRecognition dl ${CMAKE_THREAD_LIBS_INIT} ${OpenCV_LIBS})
 
 #link libraries to executable
+target_link_libraries(classifierEvaluator patternRecognition boost_filesystem boost_system)
+
 target_link_libraries(bitmapCreator patternRecognition boost_filesystem boost_system)
 
 
