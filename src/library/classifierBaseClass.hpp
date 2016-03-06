@@ -4,6 +4,8 @@
 #include<vector>
 #include<tuple>
 #include<string>
+#include<array>
+#include<opencv2/opencv.hpp>
 
 /**
 Implementations of this class implement some classification method that uses training data.  It provides a uniform interface so it is simple to make a new classification method and add it to the test suite.

@@ -8,7 +8,7 @@ find_package( OpenCV REQUIRED )
 #Get c++11
 ADD_DEFINITIONS(-std=c++11)
 
-find_package(Boost COMPONENTS filesystem) 
+find_package(Boost COMPONENTS system filesystem) 
 
 find_package(Threads)
 
@@ -41,9 +41,9 @@ ADD_EXECUTABLE(bitmapCreator ${BITMAP_CREATOR_SOURCE_FILES} ${CMAKE_CURRENT_BINA
 target_link_libraries(patternRecognition dl ${CMAKE_THREAD_LIBS_INIT} ${OpenCV_LIBS})
 
 #link libraries to executable
-target_link_libraries(classifierEvaluator patternRecognition boost_filesystem boost_system)
+target_link_libraries(classifierEvaluator patternRecognition ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
-target_link_libraries(bitmapCreator patternRecognition boost_filesystem boost_system)
+target_link_libraries(bitmapCreator patternRecognition  ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
 
 
