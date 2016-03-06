@@ -4,6 +4,7 @@
 #include<string>
 #include<algorithm>
 #include<cstdio>
+#include<vector>
 
 namespace project
 {
