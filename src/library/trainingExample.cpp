@@ -9,9 +9,9 @@ This constructor loads the images from the given paths and uses them to initiali
 trainingExample::trainingExample(const std::string &inputSourceImagePath, const std::string &inputNotWaterBitmapPath, bool inputIsWater) : isWaterImage(inputIsWater)
 {
 boost::filesystem::path imagePath(inputSourceImagePath);
-filename = imagePath.string();
+filename = imagePath.filename().string();
 
-printf("Attempting to read: %s\n", filename.c_str());
+printf("Attempting to read: %s\n", imagePath.string().c_str());
 
 sourceImage = cv::imread(inputSourceImagePath, CV_LOAD_IMAGE_COLOR);
 if(sourceImage.data == nullptr)
@@ -20,7 +20,6 @@ throw std::invalid_argument("Unable to read image");
 }
 
 printf("Attempting to read: %s\n", inputNotWaterBitmapPath.c_str());
-
 cv::Mat notWaterBitmapRaw = cv::imread(inputNotWaterBitmapPath, CV_LOAD_IMAGE_COLOR);
 if(notWaterBitmapRaw.data == nullptr)
 {
