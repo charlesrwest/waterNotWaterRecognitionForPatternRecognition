@@ -10,7 +10,7 @@ parser.parse(argv, argc);
 
 if(!(parser.optionToAssociatedArguments.at(project::PROGRAM_STRING).size() >= 3))
 {//Expecting program name, input directory, output directory
-fprintf(stderr, "Error, expected: program inputExamplesIndexPath outputDirectoryPath\n");
+fprintf(stderr, "Error, expected: %s inputExamplesIndexPath outputDirectoryPath\n", argv[0]);
 return 1;
 }
 const std::vector<std::string> &arguments = parser.optionToAssociatedArguments.at(project::PROGRAM_STRING);
@@ -22,8 +22,10 @@ std::string inputOutputDirectoryPath = arguments[2];
 
 testManager testManagerInstance(inputIndexPath);
 
+//Add one of these lines for each classifier class
 testManagerInstance.addClassifier(*(new perPixelBayesianClassifier()));
 
+//This makes output (number is fraction used for test)
 testManagerInstance.generateClassifierReports(.33, inputOutputDirectoryPath);
 
 return 0;

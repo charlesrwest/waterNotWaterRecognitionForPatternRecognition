@@ -65,6 +65,8 @@ void testManager::generateClassifierReports(double inputTestFraction, const std:
 {
 boost::filesystem::path outputDirectoryPath(inputDirectoryToWriteSegmentationResultsTo);
 
+boost::filesystem::create_directory(outputDirectoryPath);
+
 //Shuffle the training/test data (inefficient, but doesn't matter to much in this case)
 unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
