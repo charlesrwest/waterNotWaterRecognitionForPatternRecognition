@@ -1,7 +1,7 @@
 #pragma once
 
 #include "classifierBaseClass.hpp"
-
+#include "tiny_cnn.h"
 
 class NeuralNetworkClassifier : public classifierBaseClass
 {

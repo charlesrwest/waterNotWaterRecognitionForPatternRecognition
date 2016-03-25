@@ -15,7 +15,7 @@ find_package(Threads)
 #Tell compiler where to find required libraries
 link_directories(/usr/lib/x86_64-linux-gnu/ lib/)
 
-include_directories(./src/library/ ./ ./jsoncpp/json ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIR} ./tiny-cnn/)
+include_directories(./src/library/ ./ ./jsoncpp/json ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIR} ./tiny-cnn/tiny_cnn ./tiny-cnn)
 
 #Get lists of the source files
 FILE(GLOB SOURCEFILES ./src/library/*.cpp ./src/library/*.c ./jsoncpp/*.cpp)
