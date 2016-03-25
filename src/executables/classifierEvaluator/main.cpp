@@ -1,6 +1,8 @@
 #include "testManager.hpp"
 #include "commandLineArgumentParser.hpp"
 #include "perPixelBayesianClassifier.hpp"
+#include "SVMClassifier.hpp"
+#include "NeuralNetworkClassifier.hpp"
 
 int main(int argc, const char **argv)
 {
@@ -24,6 +26,8 @@ testManager testManagerInstance(inputIndexPath);
 
 //Add one of these lines for each classifier class
 testManagerInstance.addClassifier(*(new perPixelBayesianClassifier()));
+testManagerInstance.addClassifier(*(new SVMClassifier()));
+testManagerInstance.addClassifier(*(new NeuralNetworkClassifier()));
 
 //This makes output (number is fraction used for test)
 testManagerInstance.generateClassifierReports(.33, inputOutputDirectoryPath);
