@@ -1,10 +1,30 @@
 #include "SVMClassifier.hpp"
 
+using namespace cv;
+
 /**
 This function returns the name of the classifier implementation.
 */
 std::string SVMClassifier::name()
 {
+    // Data for visual representation
+    int width = 512, height = 512;
+    Mat image = Mat::zeros(height, width, CV_8UC3);
+
+    // Set up training data
+    float labels[4] = {1.0, -1.0, -1.0, -1.0};
+    Mat labelsMat(4, 1, CV_32FC1, labels);
+
+    float trainingData[4][2] = { {501, 10}, {255, 10}, {501, 255}, {10, 501} };
+    Mat trainingDataMat(4, 2, CV_32FC1, trainingData);
+
+    // Set up SVM's parameters
+    CvSVMParams params;
+    params.svm_type    = CvSVM::C_SVC;
+    params.kernel_type = CvSVM::LINEAR;
+    params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, 100, 1e-6);
+
+
 return "SVMClassifier";
 }
 
