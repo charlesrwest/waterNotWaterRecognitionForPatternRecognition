@@ -2,10 +2,17 @@
 
 #include "classifierBaseClass.hpp"
 #include "tiny_cnn.h"
+#include "utilityFunctions.hpp"
+
+//How to handle zero padding?
+//Convert images to a format that tiny-cnn can use
+//Train using images (conv or per pixel?) -> per pixel is basically conv with a single filter
+//
 
 class NeuralNetworkClassifier : public classifierBaseClass
 {
 public:
+
 /**
 This function returns the name of the classifier implementation.
 */
@@ -70,6 +77,8 @@ This function segments a single image.
 */
 cv::Mat_<bool> segment(const cv::Mat &inputImage);
 
+
+tiny_cnn::network<tiny_cnn::cross_entropy, tiny_cnn::gradient_descent> classifierNet;
 
 double waterPixelPriorProbability;
 double waterImagePriorProbability;

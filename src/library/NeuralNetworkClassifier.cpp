@@ -1,5 +1,7 @@
 #include "NeuralNetworkClassifier.hpp"
 
+using namespace tiny_cnn;
+
 /**
 This function returns the name of the classifier implementation.
 */
@@ -15,6 +17,25 @@ This function constructs a 3D pixel color histogram associated with water and no
 */
 void NeuralNetworkClassifier::train(const std::vector<trainingExample>::const_iterator &inputTrainingExamplesStartIterator, const std::vector<trainingExample>::const_iterator &inputTrainingExamplesEndIterator)
 {
+//Determine size of images (assumed to be the same)
+std::array<int64_t, 2> imageDimensions{inputTrainingExamplesStartIterator->sourceImage.cols, inputTrainingExamplesStartIterator->sourceImage.rows};
+
+classifierNet << 
+convolutional_layer<activation::relu>(imageDimensions[0], imageDimensions[1], 5, 3, 1, padding::same); // imageWidth, image height input layer, length/width of conv filter window, 3 channel input, 1 channel output (just one filter), pad image with 0s to make output same size as image, has bias and 1 stride.
+//Current settings give 5*3 = 15 free parameters
+
+//Create local cache of image data in the format that tiny_cnn finds acceptable
+std::vector<tiny_cnn::vec_t> trainingImageCache;
+std::vector<tiny_cnn::vec_t> desiredClassificationCache;
+for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
+{
+trainingImageCache.emplace_back(convert3ChannelImageToTinyCNNVector(iter->sourceImage));
+desiredClassificationCache.emplace_back(convertBoolImageToTinyCNNVector(iter->notWaterBitmap));
+}
+
+//Train using the local cache (30 minibatch, 50 epoch)
+classifierNet.train(trainingImageCache, desiredClassificationCache, 5, 1);
+
 int64_t pixelCount = 0;
 int64_t waterPixelCount = 0;
 int64_t notWaterPixelCount = 0;
