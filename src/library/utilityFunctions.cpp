@@ -87,10 +87,127 @@ result[imageWidth*(rowIndex + inputPaddingAmount) + (columnIndex + inputPaddingA
 return result;
 }
 
+/**
+This function decomposes training examples into small image patches.  This ramps up memory use considerably, so it would be better if there was another way to work with it using this library.
+@param inputTrainingExamplesStartIterator: The start of the range of training examples to use
+@param inputTrainingExamplesEndIterator: The end of the range of training examples to use
+@param inputPatchSize: What size rectangular patch to make (must be odd) 
+@return: <image patchs, expected results>
+*/
+std::array<std::vector<tiny_cnn::vec_t>, 2> decomposeTrainingExamplesAsPixelPatches(const std::vector<trainingExample>::const_iterator &inputTrainingExamplesStartIterator, const std::vector<trainingExample>::const_iterator &inputTrainingExamplesEndIterator, int64_t inputPatchSize)
+{
+if(inputPatchSize <= 0 || inputPatchSize % 2 != 1)
+{
+printf("%ld %ld\n", inputPatchSize, inputPatchSize % 2);
+return std::array<std::vector<tiny_cnn::vec_t>, 2>();
+}
+
+std::array<std::vector<tiny_cnn::vec_t>, 2> results;
+std::vector<tiny_cnn::vec_t> &imagePatch = results[0];
+std::vector<tiny_cnn::vec_t> &expectedSegmentation = results[1];
+
+for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
+{
+const cv::Mat &sourceImage = iter->sourceImage;
+const cv::Mat_<bool> &notWaterBitmap = iter->notWaterBitmap;
+
+//Zero fill if patch goes beyond edge
+for(int64_t i=0; i<sourceImage.rows; i++)
+{//Determine total brightness for averaging
+for(int64_t a=0; a<sourceImage.cols; a++)
+{ //Default to black for the image, true for notWater
+imagePatch.emplace_back(tiny_cnn::vec_t(3*inputPatchSize,0.0));
+tiny_cnn::vec_t &currentImagePatch = imagePatch.back();
+
+expectedSegmentation.emplace_back(tiny_cnn::vec_t(1,notWaterBitmap.at<bool>(i,a))); //Set expected result for pixel
 
 
+for(int rowIndex = 0; rowIndex < inputPatchSize; rowIndex++) 
+{ // Go over all rows
+for(int columnIndex = 0; columnIndex < inputPatchSize; columnIndex++) 
+{ // Go over all columns
+if(((i+rowIndex-inputPatchSize/2) < 0) || ((i+rowIndex-inputPatchSize/2) > sourceImage.rows) || ((a+columnIndex-inputPatchSize/2) < 0) || ((a+columnIndex-inputPatchSize/2) > sourceImage.cols))
+{
+continue; //Moved outside image, so leave default
+}
+cv::Vec<uchar,3> pixel = sourceImage.at<cv::Point3_<uchar>>(i+rowIndex-inputPatchSize/2, a+columnIndex-inputPatchSize/2);
+
+//Make range for image -1.0 to 1.0
+for(int pixelIndex = 0; pixelIndex < 3; pixelIndex++)
+{
+currentImagePatch[inputPatchSize*inputPatchSize*pixelIndex+inputPatchSize*rowIndex+columnIndex] = (pixel[pixelIndex]*2.0)/255.0-1.0;
+}
+
+}
+}
+
+}
+}
+
+printf("Processed image.  Result size: %ld\n", results.size());
+}
+
+return results;
+}
 
 
+/** <- currently appears to take too much RAM, need to break up training data generation
+This function decomposes training examples into small image patches.  This ramps up memory use considerably, so it would be better if there was another way to work with it using this library.
+@param inputExample: A training example to decompose
+@param inputPatchSize: What size rectangular patch to make (must be odd) 
+@return: <image patchs, expected results>
+*/
+std::array<std::vector<tiny_cnn::vec_t>, 2> decomposeTrainingExampleAsPixelPatches(const trainingExample &inputExample, int64_t inputPatchSize)
+{
+if(inputPatchSize <= 0 || inputPatchSize % 2 != 1)
+{
+printf("%ld %ld\n", inputPatchSize, inputPatchSize % 2);
+return std::array<std::vector<tiny_cnn::vec_t>, 2>();
+}
+
+std::array<std::vector<tiny_cnn::vec_t>, 2> results;
+std::vector<tiny_cnn::vec_t> &imagePatch = results[0];
+std::vector<tiny_cnn::vec_t> &expectedSegmentation = results[1];
+
+const cv::Mat &sourceImage = inputExample.sourceImage;
+const cv::Mat_<bool> &notWaterBitmap = inputExample.notWaterBitmap;
+
+//Zero fill if patch goes beyond edge
+for(int64_t i=0; i<sourceImage.rows; i++)
+{//Determine total brightness for averaging
+for(int64_t a=0; a<sourceImage.cols; a++)
+{ //Default to black for the image, true for notWater
+imagePatch.emplace_back(tiny_cnn::vec_t(3*inputPatchSize*inputPatchSize,0.0));
+tiny_cnn::vec_t &currentImagePatch = imagePatch.back();
+
+expectedSegmentation.emplace_back(tiny_cnn::vec_t(1,notWaterBitmap.at<bool>(i,a))); //Set expected result for pixel
+
+for(int rowIndex = 0; rowIndex < inputPatchSize; rowIndex++) 
+{ // Go over all rows
+for(int columnIndex = 0; columnIndex < inputPatchSize; columnIndex++) 
+{ // Go over all columns
+if(((i+rowIndex-inputPatchSize/2) < 0) || ((i+rowIndex-inputPatchSize/2) > sourceImage.rows) || ((a+columnIndex-inputPatchSize/2) < 0) || ((a+columnIndex-inputPatchSize/2) > sourceImage.cols))
+{
+continue; //Moved outside image, so leave default
+}
+cv::Vec<uchar,3> pixel = sourceImage.at<cv::Point3_<uchar>>(i+rowIndex-inputPatchSize/2, a+columnIndex-inputPatchSize/2);
+
+//Make range for image -1.0 to 1.0
+for(int pixelIndex = 0; pixelIndex < 3; pixelIndex++)
+{
+currentImagePatch[inputPatchSize*inputPatchSize*pixelIndex+inputPatchSize*rowIndex+columnIndex] = (pixel[pixelIndex]*2.0)/255.0-1.0;
+}
+
+}
+}
+
+}
+}
+
+printf("Processed image.  Result size: %ld\n", results[0].size());
+
+return results;
+}
 
 
 

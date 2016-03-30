@@ -2,6 +2,7 @@
 
 #include<opencv2/opencv.hpp>
 #include "tiny_cnn.h"
+#include "trainingExample.hpp"
 
 /**
 This function converts from a bool mat to a image that can be written out as a .png
@@ -25,3 +26,20 @@ This function converts an OpenCV image to a format that a tiny_cnn neural networ
 @return: The scaled vector to use with tiny_cnn
 */
 tiny_cnn::vec_t convertBoolImageToTinyCNNVector(const cv::Mat_<bool> &inputImage, int64_t inputPaddingAmount = 0);
+
+/** <- currently appears to take too much RAM, need to break up training data generation
+This function decomposes training examples into small image patches.  This ramps up memory use considerably, so it would be better if there was another way to work with it using this library.
+@param inputTrainingExamplesStartIterator: The start of the range of training examples to use
+@param inputTrainingExamplesEndIterator: The end of the range of training examples to use
+@param inputPatchSize: What size rectangular patch to make (must be odd) 
+@return: <image patchs, expected results>
+*/
+std::array<std::vector<tiny_cnn::vec_t>, 2> decomposeTrainingExamplesAsPixelPatches(const std::vector<trainingExample>::const_iterator &inputTrainingExamplesStartIterator, const std::vector<trainingExample>::const_iterator &inputTrainingExamplesEndIterator, int64_t inputPatchSize);
+
+/** <- currently appears to take too much RAM, need to break up training data generation
+This function decomposes training examples into small image patches.  This ramps up memory use considerably, so it would be better if there was another way to work with it using this library.
+@param inputExample: A training example to decompose
+@param inputPatchSize: What size rectangular patch to make (must be odd) 
+@return: <image patchs, expected results>
+*/
+std::array<std::vector<tiny_cnn::vec_t>, 2> decomposeTrainingExampleAsPixelPatches(const trainingExample &inputExample, int64_t inputPatchSize);

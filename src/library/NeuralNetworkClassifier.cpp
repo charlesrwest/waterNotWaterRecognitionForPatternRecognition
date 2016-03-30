@@ -17,112 +17,48 @@ This function constructs a 3D pixel color histogram associated with water and no
 */
 void NeuralNetworkClassifier::train(const std::vector<trainingExample>::const_iterator &inputTrainingExamplesStartIterator, const std::vector<trainingExample>::const_iterator &inputTrainingExamplesEndIterator)
 {
+
+
 //Determine size of images (assumed to be the same)
 std::array<int64_t, 2> imageDimensions{inputTrainingExamplesStartIterator->sourceImage.cols, inputTrainingExamplesStartIterator->sourceImage.rows};
 
-classifierNet << 
-convolutional_layer<activation::relu>(imageDimensions[0], imageDimensions[1], 5, 3, 1, padding::same); // imageWidth, image height input layer, length/width of conv filter window, 3 channel input, 1 channel output (just one filter), pad image with 0s to make output same size as image, has bias and 1 stride.
-//Current settings give 5*3 = 15 free parameters
-
-//Create local cache of image data in the format that tiny_cnn finds acceptable
-std::vector<tiny_cnn::vec_t> trainingImageCache;
-std::vector<tiny_cnn::vec_t> desiredClassificationCache;
+std::vector<const trainingExample *> examplesReferences;
 for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
 {
-trainingImageCache.emplace_back(convert3ChannelImageToTinyCNNVector(iter->sourceImage));
-desiredClassificationCache.emplace_back(convertBoolImageToTinyCNNVector(iter->notWaterBitmap));
+examplesReferences.push_back(&(*iter));
 }
 
-//Train using the local cache (30 minibatch, 50 epoch)
-classifierNet.train(trainingImageCache, desiredClassificationCache, 5, 1);
+//Create network architecture
+int64_t imagePatchSize = 5;
+classifierNet 
+<< fully_connected_layer<activation::relu>(imagePatchSize*imagePatchSize*3, 75)
+<< fully_connected_layer<activation::relu>(imagePatchSize*imagePatchSize*3, 75)
+<< fully_connected_layer<activation::relu>(imagePatchSize*imagePatchSize*3, 75)
+<< fully_connected_layer<activation::relu>(imagePatchSize*imagePatchSize*3, 75)
+<< fully_connected_layer<activation::identity>(75, 1);
 
-int64_t pixelCount = 0;
-int64_t waterPixelCount = 0;
-int64_t notWaterPixelCount = 0;
-int64_t waterImageCount = 0;
-int64_t waterPixelCountInWaterImages = 0;
-int64_t pixelCountInWaterImages = 0;
-int64_t waterPixelCountInNotWaterImages = 0;
-int64_t pixelCountInNotWaterImages = 0;
+for(int i=0; i<1; i++)
+{//Shuffle the image set so that it is presented in a different order each time
+std::random_shuffle ( examplesReferences.begin(), examplesReferences.end() );
+for(const trainingExample *exampleReference : examplesReferences)
+{
+//Should probably shuffle these too
+std::array<std::vector<tiny_cnn::vec_t>, 2> imagePatchesAndPixelSegmentation = decomposeTrainingExampleAsPixelPatches(*exampleReference, imagePatchSize);
 
-//printf("\n\nTraining\n");
-for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
-{
-//printf("%s\n", iter->filename.c_str());
-if(iter->isWaterImage)
-{
-waterImageCount++;
-}
-bool isNotWaterImage = !iter->isWaterImage;
-const cv::Mat &sourceImage = iter->sourceImage;
-const cv::Mat_<bool> &notWaterBitmap = iter->notWaterBitmap;
-
-for(int64_t i=0; i<sourceImage.rows; i++)
-{//Determine total brightness for averaging
-for(int64_t a=0; a<sourceImage.cols; a++)
-{
-bool currentPixelIsNotWater = notWaterBitmap.at<bool>(i,a);
-const cv::Point3_<uchar> &pixelColor = (cv::Point3_<uchar>&) sourceImage.at<cv::Point3_<uchar> >(i,a);
-
-if(currentPixelIsNotWater)
-{
-if(isNotWaterImage)
-{
-pixelCountInNotWaterImages++;
+if(exampleReference == examplesReferences[0] && i == 0)
+{//Reset weights on first run through
+classifierNet.train(imagePatchesAndPixelSegmentation[0], imagePatchesAndPixelSegmentation[1], 100, 1, [](){}, [](){}, true);
 }
 else
 {
-pixelCountInWaterImages++;
-}
-
-notWaterPixelPDF[pixelColor.x][pixelColor.y][pixelColor.z]++;
-notWaterPixelCount++;
-}
-else
-{
-if(isNotWaterImage)
-{
-waterPixelCountInNotWaterImages++;
-pixelCountInNotWaterImages++;
-}
-else
-{
-waterPixelCountInWaterImages++;
-pixelCountInWaterImages++;
-}
-
-waterPixelCount++;
-waterPixelPDF[pixelColor.x][pixelColor.y][pixelColor.z]++;
-}
-
-pixelCount++;
+classifierNet.train(imagePatchesAndPixelSegmentation[0], imagePatchesAndPixelSegmentation[1], 100, 1, [](){}, [](){}, false);
 }
 }
 }
 
-//Normalize PDFs
-double waterNormalizationFactor = 1.0/waterPixelCount;
-double notWaterNormalizationFactor = 1.0/notWaterPixelCount;
-
-for(int i=0; i<waterPixelPDF.size(); i++)
-{
-for(int a=0; a<waterPixelPDF.size(); a++)
-{
-for(int b=0; b<waterPixelPDF.size(); b++)
-{
-waterPixelPDF[i][a][b] = waterPixelPDF[i][a][b]*waterNormalizationFactor;
-notWaterPixelPDF[i][a][b] = notWaterPixelPDF[i][a][b]*notWaterNormalizationFactor;
-}
-}
-}
-
-
-fractionOfPixelsWaterInNotWaterImages = ((double) waterPixelCountInNotWaterImages) / pixelCountInNotWaterImages;
-
-fractionOfPixelsWaterInWaterImages = ((double) waterPixelCountInWaterImages) / pixelCountInWaterImages;
-
-waterPixelPriorProbability = ((double) waterPixelCount) / pixelCount;
-waterImagePriorProbability = ((double) waterImageCount) / (inputTrainingExamplesEndIterator-inputTrainingExamplesStartIterator);
+//Finished training, so save network in case we need it later
+std::ofstream output("net.txt");
+output << classifierNet;
 }
 
 /**
@@ -130,20 +66,7 @@ This function resets the classifier so it can be trained again.
 */
 void NeuralNetworkClassifier::reset()
 {
-for(int i=0; i<waterPixelPDF.size(); i++)
-{
-for(int a=0; a<waterPixelPDF.size(); a++)
-{
-for(int b=0; b<waterPixelPDF.size(); b++)
-{
-waterPixelPDF[i][a][b] = 0.0;
-notWaterPixelPDF[i][a][b] = 0.0;
-}
-}
-}
 
-waterPixelPriorProbability = 0.0;
-waterImagePriorProbability = 0.0;
 }
 
 /**
@@ -154,40 +77,8 @@ This function classifies images as water/not water and then compares its classif
 */
 std::tuple<double, double, double> NeuralNetworkClassifier::test(const std::vector<trainingExample>::const_iterator &inputTrainingExamplesStartIterator, const  std::vector<trainingExample>::const_iterator &inputTrainingExamplesEndIterator)
 {
-int64_t numberOfTestExamples = inputTrainingExamplesEndIterator - inputTrainingExamplesStartIterator;
-int64_t numberOfFalsePositives = 0;
-int64_t numberOfFalseNegatives = 0;
 
-//printf("\n\nTesting\n");
-for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
-{
-//printf("%s\n", iter->filename.c_str());
-bool classifiedAsNotWater = classify(*iter);
-
-if(!classifiedAsNotWater)
-{
-if(!iter->isWaterImage)
-{
-numberOfFalseNegatives++;
-}
-}
-else
-{
-if(iter->isWaterImage)
-{
-numberOfFalsePositives++;
-}
-}
-}
-
-
-
-
-double averageFalsePositiveRate = ((double) numberOfFalsePositives) / numberOfTestExamples;
-double averageFalseNegativeRate = ((double) numberOfFalseNegatives) / numberOfTestExamples;
-double averageErrorRate = averageFalsePositiveRate+averageFalseNegativeRate;
-
-return std::tuple<double, double, double>(averageErrorRate, averageFalsePositiveRate, averageFalseNegativeRate);
+return std::tuple<double, double, double>(-1.0,-1.0,-1.0);
 }
 
 /**
@@ -234,12 +125,7 @@ This function classifies the given example and returns what it thinks it is.
 */
 bool NeuralNetworkClassifier::classify(const trainingExample &inputExample)
 {
-cv::Mat_<bool> segmentation;
-double errorRate, falsePositiveRate, falseNegativeRate;
-bool classifiedAsNotWater;
-std::tie(segmentation, errorRate, falsePositiveRate, falseNegativeRate, classifiedAsNotWater) = classifyAndSegment(inputExample);
-
-return classifiedAsNotWater;
+return false;
 }
 
 /**
@@ -332,20 +218,35 @@ cv::Mat_<bool> segmentation(inputImage.rows, inputImage.cols);
 for(int64_t i=0; i<inputImage.rows; i++)
 {
 for(int64_t a=0; a<inputImage.cols; a++)
-{
-const cv::Point3_<uchar> &pixelColor = (cv::Point3_<uchar>&) inputImage.at<cv::Point3_<uchar> >(i,a);
-double waterPDF = waterPixelPDF[pixelColor.x][pixelColor.y][pixelColor.z]*waterPixelPriorProbability;
-double notWaterPDF = notWaterPixelPDF[pixelColor.x][pixelColor.y][pixelColor.z]*(1.0-waterPixelPriorProbability);
+{ 
+//Create patch associated with pixel
+int64_t imagePatchSize = 5;
+tiny_cnn::vec_t currentPixelPatch(3*imagePatchSize*imagePatchSize,0.0);
 
-bool isNotWater = waterPDF < notWaterPDF;
-if(waterPDF == 0.0 && notWaterPDF == 0.0)
+for(int rowIndex = 0; rowIndex < imagePatchSize; rowIndex++) 
+{ // Go over all rows
+for(int columnIndex = 0; columnIndex < imagePatchSize; columnIndex++) 
+{ // Go over all columns
+if(((i+rowIndex-imagePatchSize/2) < 0) || ((i+rowIndex-imagePatchSize/2) > inputImage.rows) || ((a+columnIndex-imagePatchSize/2) < 0) || ((a+columnIndex-imagePatchSize/2) > inputImage.cols))
 {
-isNotWater = waterPixelPriorProbability < .5; //Take bigger prior if no pixel data available
+continue; //Moved outside image, so leave default
+}
+cv::Vec<uchar,3> pixel = inputImage.at<cv::Point3_<uchar>>(i+rowIndex-imagePatchSize/2, a+columnIndex-imagePatchSize/2);
+
+//Make range for image -1.0 to 1.0
+for(int pixelIndex = 0; pixelIndex < 3; pixelIndex++)
+{
+currentPixelPatch[imagePatchSize*imagePatchSize*pixelIndex+imagePatchSize*rowIndex+columnIndex] = (pixel[pixelIndex]*2.0)/255.0-1.0;
 }
 
+}
+}
+
+//Calculate if this is a water or not water image based on Neural net output
+tiny_cnn::vec_t netOutput = classifierNet.predict(currentPixelPatch);
 
 
-segmentation.at<bool>(i,a) = isNotWater;
+segmentation.at<bool>(i,a) = (netOutput[0] >= 0);
 }
 }
 
