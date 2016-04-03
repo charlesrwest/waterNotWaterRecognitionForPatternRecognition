@@ -4,6 +4,8 @@
 #include "SVMClassifier.hpp"
 #include "NeuralNetworkClassifier.hpp"
 
+#include <time.h>
+
 int main(int argc, const char **argv)
 {
 //Read in arguments and make sure the right number are there
@@ -27,10 +29,18 @@ testManager testManagerInstance(inputIndexPath);
 //Add one of these lines for each classifier class
 testManagerInstance.addClassifier(*(new perPixelBayesianClassifier()));
 testManagerInstance.addClassifier(*(new SVMClassifier()));
-//testManagerInstance.addClassifier(*(new NeuralNetworkClassifier()));
+
+testManagerInstance.addClassifier(*(new NeuralNetworkClassifier()));
+
+time_t start,end;
+time (&start);
 
 //This makes output (number is fraction used for test)
 testManagerInstance.generateClassifierReports(.33, inputOutputDirectoryPath);
+
+time (&end);
+double dif = difftime (end,start);
+printf ("Elasped time is %.2lf seconds.", dif );
 
 return 0;
 } 

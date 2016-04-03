@@ -18,6 +18,15 @@ This function constructs a 3D pixel color histogram associated with water and no
 void NeuralNetworkClassifier::train(const std::vector<trainingExample>::const_iterator &inputTrainingExamplesStartIterator, const std::vector<trainingExample>::const_iterator &inputTrainingExamplesEndIterator)
 {
 
+//Create network architecture
+int64_t imagePatchSize = 5;
+int64_t imagePixelCountSize = imagePatchSize*imagePatchSize*3;
+classifierNet 
+<< fully_connected_layer<activation::leaky_relu>(imagePixelCountSize, imagePixelCountSize)
+<< fully_connected_layer<activation::leaky_relu>(imagePixelCountSize, imagePixelCountSize)
+<< fully_connected_layer<activation::leaky_relu>(imagePixelCountSize, imagePixelCountSize)
+<< fully_connected_layer<activation::leaky_relu>(imagePixelCountSize, imagePixelCountSize)
+<< fully_connected_layer<activation::identity>(imagePixelCountSize, 1);
 
 //Determine size of images (assumed to be the same)
 std::array<int64_t, 2> imageDimensions{inputTrainingExamplesStartIterator->sourceImage.cols, inputTrainingExamplesStartIterator->sourceImage.rows};
@@ -28,14 +37,6 @@ for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExample
 examplesReferences.push_back(&(*iter));
 }
 
-//Create network architecture
-int64_t imagePatchSize = 5;
-classifierNet 
-<< fully_connected_layer<activation::relu>(imagePatchSize*imagePatchSize*3, 75)
-<< fully_connected_layer<activation::relu>(imagePatchSize*imagePatchSize*3, 75)
-<< fully_connected_layer<activation::relu>(imagePatchSize*imagePatchSize*3, 75)
-<< fully_connected_layer<activation::relu>(imagePatchSize*imagePatchSize*3, 75)
-<< fully_connected_layer<activation::identity>(75, 1);
 
 for(int i=0; i<1; i++)
 {//Shuffle the image set so that it is presented in a different order each time
@@ -59,6 +60,12 @@ classifierNet.train(imagePatchesAndPixelSegmentation[0], imagePatchesAndPixelSeg
 //Finished training, so save network in case we need it later
 std::ofstream output("net.txt");
 output << classifierNet;
+
+
+/*
+std::ifstream input("net01.txt");
+input >> classifierNet;
+*/
 }
 
 /**
@@ -245,8 +252,10 @@ currentPixelPatch[imagePatchSize*imagePatchSize*pixelIndex+imagePatchSize*rowInd
 //Calculate if this is a water or not water image based on Neural net output
 tiny_cnn::vec_t netOutput = classifierNet.predict(currentPixelPatch);
 
+//printf("Net output: %lf\n", netOutput[0]);
 
-segmentation.at<bool>(i,a) = (netOutput[0] >= 0);
+
+segmentation.at<bool>(i,a) = (netOutput[0] >= .5);
 }
 }
 
