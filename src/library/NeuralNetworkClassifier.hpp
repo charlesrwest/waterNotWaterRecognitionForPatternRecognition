@@ -78,7 +78,7 @@ This function segments a single image.
 cv::Mat_<bool> segment(const cv::Mat &inputImage);
 
 
-tiny_cnn::network<tiny_cnn::mse, tiny_cnn::gradient_descent> classifierNet;
+tiny_cnn::network<tiny_cnn::mse, tiny_cnn::adam> classifierNet;
 
 double waterPixelPriorProbability;
 double waterImagePriorProbability;
