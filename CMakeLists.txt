@@ -5,6 +5,10 @@ option(BUILD_DOCS "Build Documentation" OFF)
 
 find_package( OpenCV REQUIRED )
 
+find_package(Caffe)
+include_directories(${Caffe_INCLUDE_DIRS})
+add_definitions(${Caffe_DEFINITIONS})    # ex. -DCPU_ONLY
+
 #Get c++11
 ADD_DEFINITIONS(-std=c++11)
 
@@ -38,7 +42,7 @@ ADD_EXECUTABLE(classifierEvaluator ${CLASSIFIER_EVALUATOR_SOURCE_FILES} ${CMAKE_
 
 ADD_EXECUTABLE(bitmapCreator ${BITMAP_CREATOR_SOURCE_FILES} ${CMAKE_CURRENT_BINARY_DIR}) 
 
-target_link_libraries(patternRecognition dl ${CMAKE_THREAD_LIBS_INIT} ${OpenCV_LIBS})
+target_link_libraries(patternRecognition dl ${CMAKE_THREAD_LIBS_INIT} ${OpenCV_LIBS} ${Caffe_LIBRARIES})
 
 #link libraries to executable
 target_link_libraries(classifierEvaluator patternRecognition ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
