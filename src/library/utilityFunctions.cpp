@@ -213,18 +213,24 @@ return results;
 /**
 This function takes in a set of opencv images and reformats the data so that it can be handed to an appropriately sized blob via mutable_cpu_data.
 @param inputImages: The images to convert
+@param inputScalingFactor: How much to multiply the image by
+@param inputTranslationFactor: How much to add to the image after scaling
 @return: The data to use in the blob 
 */
-std::vector<float> convertCVImagesToDataForBlob(const std::vector<cv::Mat> &inputImages)
+std::vector<float> convertCVImagesToDataForBlob(const std::vector<cv::Mat> &inputImages, double inputScalingFactor, double inputTranslationFactor)
 {
 if(inputImages.size() == 0)
 {
 return std::vector<float>();
 }
 
-int64_t imageDepth = inputImages[0].depth();
+int64_t imageDepth = inputImages[0].channels();
 
-std::vector<float> result(inputImages[0].rows*inputImages[0].cols*imageDepth);
+//printf("Image depth: %ld\n", imageDepth);
+
+std::vector<float> result(imageDepth*inputImages[0].rows*inputImages[0].cols*inputImages.size());
+
+//printf("Result size: %ld\n", result.size());
 
 for(int64_t imageIndex = 0; imageIndex < inputImages.size(); imageIndex++)
 {
@@ -234,7 +240,9 @@ for(int64_t col=0; col<inputImages[imageIndex].cols; col++)
 {
 for(int64_t channel=0; channel < imageDepth; channel++)
 {
-result[((imageIndex * imageDepth + channel) * inputImages[imageIndex].rows + row) * inputImages[imageIndex].cols + col] = inputImages[imageIndex].at<float>(row, col, channel);
+//printf("Array index: %ld\n", ((imageIndex * imageDepth + channel) * inputImages[imageIndex].rows + row) * inputImages[imageIndex].cols + col);
+//printf("Image: %ld, %ld, %ld, %ld\n", row, col, channel, imageIndex);
+result[((imageIndex * imageDepth + channel) * inputImages[imageIndex].rows + row) * inputImages[imageIndex].cols + col] = (inputImages[imageIndex].at<cv::Vec3d>(row, col)[channel])*inputScalingFactor + inputTranslationFactor;
 }
 }
 }

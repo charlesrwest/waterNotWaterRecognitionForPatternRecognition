@@ -48,8 +48,10 @@ std::array<std::vector<tiny_cnn::vec_t>, 2> decomposeTrainingExampleAsPixelPatch
 /**
 This function takes in a set of opencv images and reformats the data so that it can be handed to an appropriately sized blob via mutable_cpu_data.
 @param inputImages: The images to convert
+@param inputScalingFactor: How much to multiply the image by
+@param inputTranslationFactor: How much to add to the image after scaling
 @return: The data to use in the blob 
 */
-std::vector<float> convertCVImagesToDataForBlob(const std::vector<cv::Mat> &inputImages);
+std::vector<float> convertCVImagesToDataForBlob(const std::vector<cv::Mat> &inputImages, double inputScalingFactor = 1.0, double inputTranslationFactor = 0.0);
 
 
