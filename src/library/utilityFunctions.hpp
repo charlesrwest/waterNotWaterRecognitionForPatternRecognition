@@ -3,6 +3,7 @@
 #include<opencv2/opencv.hpp>
 #include "tiny_cnn.h"
 #include "trainingExample.hpp"
+#include<caffe/caffe.hpp>
 
 /**
 This function converts from a bool mat to a image that can be written out as a .png
@@ -43,3 +44,12 @@ This function decomposes training examples into small image patches.  This ramps
 @return: <image patchs, expected results>
 */
 std::array<std::vector<tiny_cnn::vec_t>, 2> decomposeTrainingExampleAsPixelPatches(const trainingExample &inputExample, int64_t inputPatchSize);
+
+/**
+This function takes in a set of opencv images and reformats the data so that it can be handed to an appropriately sized blob via mutable_cpu_data.
+@param inputImages: The images to convert
+@return: The data to use in the blob 
+*/
+std::vector<float> convertCVImagesToDataForBlob(const std::vector<cv::Mat> &inputImages);
+
+

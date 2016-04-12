@@ -210,6 +210,39 @@ return results;
 }
 
 
+/**
+This function takes in a set of opencv images and reformats the data so that it can be handed to an appropriately sized blob via mutable_cpu_data.
+@param inputImages: The images to convert
+@return: The data to use in the blob 
+*/
+std::vector<float> convertCVImagesToDataForBlob(const std::vector<cv::Mat> &inputImages)
+{
+if(inputImages.size() == 0)
+{
+return std::vector<float>();
+}
+
+int64_t imageDepth = inputImages[0].depth();
+
+std::vector<float> result(inputImages[0].rows*inputImages[0].cols*imageDepth);
+
+for(int64_t imageIndex = 0; imageIndex < inputImages.size(); imageIndex++)
+{
+for(int64_t row=0; row<inputImages[imageIndex].rows; row++)
+{
+for(int64_t col=0; col<inputImages[imageIndex].cols; col++)
+{
+for(int64_t channel=0; channel < imageDepth; channel++)
+{
+result[((imageIndex * imageDepth + channel) * inputImages[imageIndex].rows + row) * inputImages[imageIndex].cols + col] = inputImages[imageIndex].at<float>(row, col, channel);
+}
+}
+}
+}
+
+return result;
+}
+
 
 
 

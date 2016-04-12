@@ -2,7 +2,7 @@
 #include "commandLineArgumentParser.hpp"
 #include "perPixelBayesianClassifier.hpp"
 #include "SVMClassifier.hpp"
-#include "NeuralNetworkClassifier.hpp"
+#include "ConvolutionalNeuralNetworkClassifier.hpp"
 
 #include <time.h>
 
@@ -30,7 +30,7 @@ testManager testManagerInstance(inputIndexPath);
 testManagerInstance.addClassifier(*(new perPixelBayesianClassifier()));
 testManagerInstance.addClassifier(*(new SVMClassifier()));
 
-testManagerInstance.addClassifier(*(new NeuralNetworkClassifier()));
+testManagerInstance.addClassifier(*(new ConvolutionalNeuralNetworkClassifier()));
 
 time_t start,end;
 time (&start);

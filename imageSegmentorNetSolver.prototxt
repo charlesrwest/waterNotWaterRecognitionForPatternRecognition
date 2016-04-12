@@ -1,0 +1,13 @@
+# this follows "ADAM: A METHOD FOR STOCHASTIC OPTIMIZATION"
+# All parameters are from the cited paper above
+type: "Adam"
+base_lr: 0.001
+momentum: 0.9
+momentum2: 0.999
+# since Adam dynamically changes the learning rate, we set the base learning rate to a fixed value
+lr_policy: "fixed"
+
+max_iter: 2
+
+net: "imageSegmentorNetTrain.prototxt"
+
