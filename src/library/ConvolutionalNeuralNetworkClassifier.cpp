@@ -18,22 +18,30 @@ This function constructs a 3D pixel color histogram associated with water and no
 */
 void ConvolutionalNeuralNetworkClassifier::train(const std::vector<trainingExample>::const_iterator &inputTrainingExamplesStartIterator, const std::vector<trainingExample>::const_iterator &inputTrainingExamplesEndIterator)
 {
+
+std::vector<float> blobTrainingImages;
+std::vector<float> blobExpectedOutput;
+int64_t numberOfImages = 0;
+
+{
 std::vector<cv::Mat> trainingImages;
 std::vector<cv::Mat> expectedNetworkOutput;
-std::vector<int> fakeLabels;
 
 for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
 {
-//3 Channel input images
 trainingImages.emplace_back(inputTrainingExamplesStartIterator->sourceImage);
-//inputTrainingExamplesStartIterator->sourceImage.convertTo(trainingImages.back(),CV_32FC3, 255.0);
 
 expectedNetworkOutput.emplace_back(); //Convert to single channel float
 inputTrainingExamplesStartIterator->notWaterBitmap.convertTo(expectedNetworkOutput.back(), CV_8UC1, 1.0);
-
-fakeLabels.push_back(1);
 }
-std::vector<int> fakeLabels1 = fakeLabels;
+
+numberOfImages = trainingImages.size();
+
+blobTrainingImages = convertCVImagesToDataForBlob(trainingImages, 2.0/255.0, -255.0/2.0); //Convert, scaling to -1 to 1 
+blobExpectedOutput = convertCVImagesToDataForBlob(expectedNetworkOutput, 2.0, -.5); //Convert, scaling to -1 to 1
+}
+
+std::vector<float> dummyLabel(blobTrainingImages.size(), 1.0);
 
 //Create training network
 //Set to run on CPU
@@ -48,17 +56,18 @@ caffe::ReadProtoFromTextFileOrDie("imageSegmentorNetSolver.prototxt", &solver_pa
 std::unique_ptr<caffe::Solver<float> > solver(caffe::SolverRegistry<float>::CreateSolver(solver_param));
 
 //Load the data into the memory layer
-caffe::MemoryDataLayer<float> &dataLayerImplementation = (*boost::static_pointer_cast<caffe::MemoryDataLayer<float>>(solver->net()->layers()[0]));
+caffe::MemoryDataLayer<float> &dataLayerImplementation = (*boost::static_pointer_cast<caffe::MemoryDataLayer<float>>(solver->net()->layer_by_name("data")));
 
 caffe::MemoryDataLayer<float> &dataLayerImplementation1 = (*boost::static_pointer_cast<caffe::MemoryDataLayer<float>>(solver->net()->layer_by_name("data1")));
 
-dataLayerImplementation.AddMatVector(trainingImages, fakeLabels);
+printf("Blob image size: %ld\n", blobTrainingImages.size());
 
-dataLayerImplementation1.AddMatVector(expectedNetworkOutput, fakeLabels1);
+dataLayerImplementation.Reset(blobTrainingImages.data(), dummyLabel.data(), numberOfImages);
+
+dataLayerImplementation1.Reset(blobExpectedOutput.data(), dummyLabel.data(), numberOfImages);
 
 solver->Solve();
 
-solver->Solve();
 
 caffe::NetParameter serializedSolverNetwork;
 
@@ -73,7 +82,6 @@ caffe::Net<float>::FilterNet(serializedSolverNetwork, &filteredSerializedSolverN
 
 network.reset(new caffe::Net<float>("imageSegmentorNetTest.prototxt", caffe::TEST));
 network->CopyTrainedLayersFrom(filteredSerializedSolverNetwork);
-
 }
 
 /**
@@ -150,10 +158,6 @@ This function segments a single image.
 */
 std::tuple<cv::Mat_<bool>, double, double, double> ConvolutionalNeuralNetworkClassifier::segment(const trainingExample &inputExample)
 {
-cv::Mat_<bool> segmentation;
-double errorRate, falsePositiveRate, falseNegativeRate;
-bool classifiedAsNotWater;
-
 const cv::Mat &sourceImage = inputExample.sourceImage;
 const cv::Mat_<bool> &notWaterBitmap = inputExample.notWaterBitmap;
 
@@ -161,7 +165,27 @@ int64_t falsePositiveCount = 0;
 int64_t falseNegativeCount = 0;
 int64_t numberOfPixelsInImage = sourceImage.rows*sourceImage.cols;
 
-//cv::Mat_<bool> segmentation = segment(sourceImage);
+cv::Mat_<bool> segmentation = segment(sourceImage);
+
+for(int64_t row=0; row<segmentation.rows; row++)
+{
+for(int64_t col=0; col<segmentation.cols; col++)
+{
+if(segmentation.at<bool>(row, col) && !notWaterBitmap.at<bool>(row, col))
+{//False Positive
+falsePositiveCount++;
+}
+
+if(!segmentation.at<bool>(row, col) && notWaterBitmap.at<bool>(row, col))
+{//False negative
+falseNegativeCount++;
+}
+}
+}
+
+double errorRate = (falsePositiveCount+falseNegativeCount)/((double) numberOfPixelsInImage);
+double falsePositiveRate = falsePositiveCount/((double) numberOfPixelsInImage);
+double falseNegativeRate = falseNegativeCount/((double) numberOfPixelsInImage);
 
 
 //std::tie(segmentation, errorRate, falsePositiveRate, falseNegativeRate, classifiedAsNotWater) = classifyAndSegment(inputExample);
@@ -177,45 +201,34 @@ This function segments a single image.
 */
 cv::Mat_<bool> ConvolutionalNeuralNetworkClassifier::segment(const cv::Mat &inputImage)
 {
+//Load image into network
+std::vector<float> convertedImage = convertCVImagesToDataForBlob(std::vector<cv::Mat>{inputImage}, 2.0/255.0, -255.0/2.0); //Convert, scaling to -1 to 1 
+
+const std::vector< boost::shared_ptr< caffe::Blob<float> > > &inputNetBlobs = network->blobs();
+
+caffe::Blob<float> &inputBlob = *inputNetBlobs[0];
+
+float *array = inputBlob.mutable_cpu_data();
+for(int i=0; i<convertedImage.size(); i++)
+{
+array[i] = convertedImage[i];
+}
+inputBlob.mutable_cpu_data(); //Make sure data gets syncronized
+
+//Get output from network
+const std::vector<caffe::Blob<float>*> &result = network->Forward();
+
+//Convert it to a boolean image
 cv::Mat_<bool> segmentation(inputImage.rows, inputImage.cols);
 
-/*
-for(int64_t i=0; i<inputImage.rows; i++)
+for(int64_t row=0; row<segmentation.rows; row++)
 {
-for(int64_t a=0; a<inputImage.cols; a++)
-{ 
-//Create patch associated with pixel
-tiny_cnn::vec_t currentPixelPatch(3*imagePatchSize*imagePatchSize,0.0);
-
-for(int rowIndex = 0; rowIndex < imagePatchSize; rowIndex++) 
-{ // Go over all rows
-for(int columnIndex = 0; columnIndex < imagePatchSize; columnIndex++) 
-{ // Go over all columns
-if(((i+rowIndex-imagePatchSize/2) < 0) || ((i+rowIndex-imagePatchSize/2) > inputImage.rows) || ((a+columnIndex-imagePatchSize/2) < 0) || ((a+columnIndex-imagePatchSize/2) > inputImage.cols))
+for(int64_t col=0; col<segmentation.cols; col++)
 {
-continue; //Moved outside image, so leave default
-}
-cv::Vec<uchar,3> pixel = inputImage.at<cv::Point3_<uchar>>(i+rowIndex-imagePatchSize/2, a+columnIndex-imagePatchSize/2);
-
-//Make range for image -1.0 to 1.0
-for(int pixelIndex = 0; pixelIndex < 3; pixelIndex++)
-{
-currentPixelPatch[imagePatchSize*imagePatchSize*pixelIndex+imagePatchSize*rowIndex+columnIndex] = (pixel[pixelIndex]*2.0)/255.0-1.0;
-}
-
+segmentation.at<bool>(row, col) = result[0]->cpu_data()[(segmentation.rows + row) * segmentation.cols + col] > 0;
 }
 }
 
-//Calculate if this is a water or not water image based on Neural net output
-tiny_cnn::vec_t netOutput = classifierNet.predict(currentPixelPatch);
-
-//printf("Net output: %lf\n", netOutput[0]);
-
-
-segmentation.at<bool>(i,a) = (netOutput[0] >= .5);
-}
-}
-*/
 
 return segmentation;
 }
