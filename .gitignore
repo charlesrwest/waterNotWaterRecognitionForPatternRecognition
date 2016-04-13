@@ -19,3 +19,5 @@ ui_*
 .directory
 /data/*
 /output/*
+*.solverstate
+*.caffemodel

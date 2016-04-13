@@ -6,8 +6,10 @@ momentum: 0.9
 momentum2: 0.999
 # since Adam dynamically changes the learning rate, we set the base learning rate to a fixed value
 lr_policy: "fixed"
+snapshot: 100
+snapshot_prefix: "snapshot"
 
-max_iter: 2
+max_iter: 10000000
 
 net: "imageSegmentorNetTrain.prototxt"
 
