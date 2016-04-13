@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 2.8.3)
 PROJECT(patternRecognition)
 
+add_definitions(-DMAX_LOG_LEVEL=-100)
 option(BUILD_DOCS "Build Documentation" OFF)
 
 find_package( OpenCV REQUIRED )
