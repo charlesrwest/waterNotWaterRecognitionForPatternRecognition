@@ -7,7 +7,7 @@ momentum2: 0.999
 # since Adam dynamically changes the learning rate, we set the base learning rate to a fixed value
 lr_policy: "fixed"
 
-max_iter: 42
+max_iter: 2
 
 net: "imageSegmentorNetTrain.prototxt"
 

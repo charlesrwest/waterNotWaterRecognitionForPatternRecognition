@@ -45,7 +45,7 @@ std::vector<float> dummyLabel(blobTrainingImages.size(), 1.0);
 
 //Create training network
 //Set to run on CPU
-Caffe::set_mode(Caffe::CPU);
+Caffe::set_mode(Caffe::GPU);
 
 //Read prototxt file to get network structure
 caffe::SolverParameter solver_param;
@@ -214,6 +214,8 @@ for(int i=0; i<convertedImage.size(); i++)
 array[i] = convertedImage[i];
 }
 inputBlob.mutable_cpu_data(); //Make sure data gets syncronized
+inputBlob.gpu_data();
+inputBlob.mutable_gpu_data();
 
 //Get output from network
 const std::vector<caffe::Blob<float>*> &result = network->Forward();
