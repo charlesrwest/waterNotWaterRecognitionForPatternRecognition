@@ -217,6 +217,7 @@ array[i] = convertedImage[i];
 }
 inputBlob.mutable_cpu_data(); //Make sure data gets syncronized
 
+
 //Get output from network
 const std::vector<caffe::Blob<float>*> &result = network->Forward();
 
