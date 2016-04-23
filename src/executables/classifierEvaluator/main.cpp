@@ -30,7 +30,7 @@ testManager testManagerInstance(inputIndexPath);
 testManagerInstance.addClassifier(*(new perPixelBayesianClassifier()));
 testManagerInstance.addClassifier(*(new SVMClassifier()));
 
-testManagerInstance.addClassifier(*(new NeuralNetworkClassifier()));
+//testManagerInstance.addClassifier(*(new NeuralNetworkClassifier()));
 
 time_t start,end;
 time (&start);
