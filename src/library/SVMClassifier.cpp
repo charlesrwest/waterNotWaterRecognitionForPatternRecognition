@@ -72,13 +72,13 @@ void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &in
 	int64_t pixelCountInWaterImages = 0;
 	int64_t waterPixelCountInNotWaterImages = 0;
 	int64_t pixelCountInNotWaterImages = 0;
-	int64_t numberOfTestExamples = inputTrainingExamplesEndIterator - inputTrainingExamplesStartIterator;
+	//int64_t numberOfTestExamples = inputTrainingExamplesEndIterator - inputTrainingExamplesStartIterator;
 	//int64_t numberOfTestExamples = 2;
 	int width = 500, height = 375;
-	int totalPixels = ((int)numberOfTestExamples)* width*height;
+	//int totalPixels = ((int)numberOfTestExamples)* width*height;
 	//int totalPixels = width*height;
-	//int totalPixels = 2000;
-	//cout << totalPixels << endl;
+	int totalPixels = 1000;
+	cout << totalPixels << endl;
 	float labels[totalPixels+1 ];
 	float trainingData[totalPixels+1 ][3];
         cout << "about to start iterator" << endl;
@@ -102,8 +102,8 @@ void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &in
 
 				const cv::Point3_<uchar> &pixelColor = (cv::Point3_<uchar>&) sourceImage.at<cv::Point3_<uchar> >(i,a);
 				// This part was added. 20 should be changed later.
-				//if( (pixelCount < totalPixels+1) && ((currentPixelIsNotWater && (pixelCount%2==0)) || (!currentPixelIsNotWater && (pixelCount%2==1) )  ) ) {
-				if ( pixelCount < totalPixels+1) {
+				if( (pixelCount < totalPixels+1) && ((currentPixelIsNotWater && (pixelCount%2==0)) || (!currentPixelIsNotWater && (pixelCount%2==1) )  ) ) {
+			//	if ( pixelCount < totalPixels+1) {
 					trainingData[pixelCount][0] = pixelColor.x;
 					trainingData[pixelCount][1] = pixelColor.y;
 					trainingData[pixelCount][2] = pixelColor.z;
@@ -183,10 +183,10 @@ void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &in
 	// Set up SVM's parameters
 	CvSVMParams params;
 	params.svm_type    = CvSVM::C_SVC;
-	params.gamma           = 2;
+	//params.gamma           = 2;
 	//params.coef0           = 1;
 	params.C           = .5;
-	params.kernel_type = CvSVM::RBF;
+	params.kernel_type = CvSVM::LINEAR;
 	params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, int(1e7), 1e-6);
 
 	// Train the SVM
