@@ -420,7 +420,7 @@ cv::Mat_<bool> SVMClassifier::segment(const cv::Mat &inputImage)
 
 			Mat inputDataMat(1,3,CV_32FC1,inputData);	
 			float response = svm.predict(inputDataMat);
-			if (fabs(response + 1.0) < .5) 
+			if (response < 0.0) 
 			{
 				isNotWater = 0;
 			} else {
