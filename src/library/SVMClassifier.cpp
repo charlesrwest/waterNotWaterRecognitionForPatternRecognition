@@ -77,7 +77,7 @@ void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &in
 	int width = 500, height = 333;
 	//int totalPixels = ((int)numberOfTestExamples)* width*height;
 	//int totalPixels = width*height;
-	int totalPixels = 1000;
+	int totalPixels = 10000;
 	cout << totalPixels << endl;
 	float labels[totalPixels+1 ];
 	float trainingData[totalPixels+1 ][3];
@@ -420,7 +420,7 @@ cv::Mat_<bool> SVMClassifier::segment(const cv::Mat &inputImage)
 
 			Mat inputDataMat(1,3,CV_32FC1,inputData);	
 			float response = svm.predict(inputDataMat);
-			if (response == -1) 
+			if (fabs(response + 1.0) < .5) 
 			{
 				isNotWater = 0;
 			} else {
