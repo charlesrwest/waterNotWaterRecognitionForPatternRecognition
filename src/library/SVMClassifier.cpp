@@ -74,7 +74,7 @@ void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &in
 	int64_t pixelCountInNotWaterImages = 0;
 	int64_t numberOfTestExamples = inputTrainingExamplesEndIterator - inputTrainingExamplesStartIterator;
 	//int64_t numberOfTestExamples = 2;
-	//int width = 500, height = 375;
+	int width = 500, height = 375;
 	int totalPixels = ((int)numberOfTestExamples)* width*height;
 	//int totalPixels = width*height;
 	//int totalPixels = 2000;
