@@ -9,6 +9,7 @@
 \usepackage{amsmath,amsthm,amssymb}
 \usepackage{graphicx}
 \usepackage{enumitem}
+\usepackage{subcaption}
 
 \begin{document}
  
@@ -90,6 +91,43 @@ To implement a CNN, we utilized a couple of different C++ libraries which we emb
 \\
 	In some of the earlier stages of solver investigation, leaky RELU and PRELU appeared to offer some performance advantages. However, once the ADAM solver was used these advantages were not apparent. PRELU actually gave worse results.  Adding depth to the network also improved the quality of the approximation, given sufficient training time Replacing the cross-entropy loss function and switching to ADAM resulted in the most significant changes.  Dropout and batch normalization were tried, but both seemed to reduce the quality of the approximation.  It is quite possible that they would be useful for many other problems or that something was setup incorrectly, but it was concluded that they should not be used for the prototype pixel classifier network.\\
 
+\begin{figure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{./images/sineApproximation/idealOutput.png}
+  \caption{Ideal network output}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{./images/sineApproximation/Adam50Node4LayerLeakyRELU300Batch500Iter.png}
+  \caption{4 Layer Leaky RELU with 50 nodes/layer, ADAM and 500 Epocs}
+
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{./images/sineApproximation/Adam25Node4LayerLeakyRELU300Batch500Iter.png}
+  \caption{4 Layer Leaky RELU with 25 nodes/layer, ADAM and 500 Epocs}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{./images/sineApproximation/Adam25Node3LayerLeakyRELU300Batch500Iter.png}
+  \caption{3 Layer Leaky RELU with 25 nodes/layer, ADAM and 500 Epocs}
+\end{subfigure}
+
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{./images/sineApproximation/GradientDescent25Node4LayerLeakyRELU300Batch500Iter.png}
+  \caption{4 Layer Leaky RELU with 50 nodes/layer, Gradient Descent and 500 Epocs}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{./images/sineApproximation/GradientDescent25Node3LayerLeakyRELU300Batch500Iter.png}
+  \caption{3 Layer Leaky RELU with 25 nodes/layer, Gradient Descent and 500 Epocs}
+\end{subfigure}
+
+\caption{Approximations of the Sine Function}
+\end{figure}
+
 \subsubsection{Second Neural Network Classifier}
 
 	Given the results of the sine approximation experiments, another attempt to make a pixel patch classifier was made.  Since the leaky RELU units had seemed more robust to settings, a 5 layer network was constructed with 75 nodes per layer (leaky RELU,  leaky RELU,  leaky RELU,  leaky RELU, linear) using the ADAM solver and mean squared error loss function.  A complication arose for the training procedure in that it was not possible to break all images into pixel patches and present them to the ADAM solver simultaneously due to RAM limitations.  This constraint meant that each training image had to be independently broken up and presented to the solver one at a time (resetting the ADAM parameters for each image).  This may have reduced training efficiency, but training the network for a day and a half resulted in a 33\% pixel error and recognizable segmentations (each image taking about 10 minutes to process).  Training for longer periods of time did not seem to remarkably improve classifier accuracy and the failure of other efforts meant that this classifier was our highest performing neural network classifier.
@@ -144,6 +182,57 @@ To implement a CNN, we utilized a couple of different C++ libraries which we emb
 \section{Results}
 	\subsection{Neural Networks}
 	Ultimately, the neural network solution did not offer as high accuracy as the per pixel Bayesian classifier, despite looking at 5x5 patches rather than just single pixels.  There are several possible causes for this.  The most probably is that the network used was just too small.  The initial layer was only 75 nodes, which translates to only really being able to look at 75 features of the data.  In contrast, the per pixel classifier was able to look at the 255*255*255 different possible colors of the pixel and make decisions based on its specific shade.  Even if the network was able to just focus on the middle pixel, it would not be able to notice as fine grain details as the Bayesian classifier.  While the obvious solution would be to increase the size of the network, there is a quadratic slowdown in the training speed as the number of nodes per layer is increased.  Given the amount of time that it takes the network to process a single image, that makes significantly increasing the network size difficult.  GPU acceleration would get around this issue, but does not seem to be an option at this time.
+
+\begin{figure}
+\begin{subfigure}{.33\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{./images/sourceImages/9731928435_8f83f7253e.png}
+  \caption{Original Image}
+\end{subfigure}%
+\begin{subfigure}{.33\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{./images/perPixelBayesianClassifierPrimaryResults/9731928435_8f83f7253e.png}
+  \caption{Per Pixel Bayesian Result}
+\end{subfigure}%
+\begin{subfigure}{.33\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{./images/NeuralNetworkClassifierpt339602PrimaryResults25NodeLayers/9731928435_8f83f7253e.png}
+  \caption{Neural Network Result}
+\end{subfigure}%
+
+\begin{subfigure}{.33\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{./images/sourceImages/9735153100_74810bbe65.png}
+  \caption{Original Image}
+\end{subfigure}%
+\begin{subfigure}{.33\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{./images/perPixelBayesianClassifierPrimaryResults/9735153100_74810bbe65.png}
+  \caption{Per Pixel Bayesian Result}
+\end{subfigure}%
+\begin{subfigure}{.33\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{./images/NeuralNetworkClassifierpt339602PrimaryResults25NodeLayers/9735153100_74810bbe65.png}
+  \caption{Neural Network Result}
+\end{subfigure}%
+
+\begin{subfigure}{.33\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{./images/sourceImages/9780984764_7863c32b65.png}
+  \caption{Original Image}
+\end{subfigure}%
+\begin{subfigure}{.33\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{./images/perPixelBayesianClassifierPrimaryResults/9780984764_7863c32b65.png}
+  \caption{Per Pixel Bayesian Result}
+\end{subfigure}%
+\begin{subfigure}{.33\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{./images/NeuralNetworkClassifierpt339602PrimaryResults25NodeLayers/9780984764_7863c32b65.png}
+  \caption{Neural Network Result}
+\end{subfigure}%
+
+\end{figure}
 
 	While the per pixel Bayesian classifier outperformed the neural network classifier, there are some interesting differences between their output.  In general, the neural network classifier was much more consistent in its choices due to looking a multiple pixels in the image.  It also tended to deal better with reflections.  That said, it had trouble telling the difference between water and the sky and still only examined a small portion of the scene.  Overall, the neural network approach appears to have significant promise (particularly if it is possible to adapt the lower levels of a professional convolutional network) but technical limitations appeared to make it difficult for that potential to be realized in this project.
 
