@@ -19,3 +19,6 @@ ui_*
 .directory
 /data/*
 /output/*
+/proj02_report/*.aux
+/proj02_report/*.log
+/proj02_report/*.pdf
