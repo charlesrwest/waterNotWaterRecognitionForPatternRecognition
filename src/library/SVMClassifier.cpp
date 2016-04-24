@@ -35,22 +35,22 @@ std::string SVMClassifier::name()
  */
 void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &inputTrainingExamplesStartIterator, const std::vector<trainingExample>::const_iterator &inputTrainingExamplesEndIterator)
 {
-	cout << "Start" << endl;
+	//cout << "Start" << endl;
 	int64_t pixelCount = 0;
 	int64_t waterPixelCount = 0;
 	//int64_t numberOfTestExamples = inputTrainingExamplesEndIterator - inputTrainingExamplesStartIterator;
-		int width = 500, height = 333;
-		//int totalPixels = width*height;
-		int totalPixels = 100;
-	cout << totalPixels << endl;
+	int width = 500, height = 333;
+	//int totalPixels = width*height;
+	int totalPixels = 2500;
+	//cout << totalPixels << endl;
 	float labels[totalPixels ];
 	float trainingData[totalPixels][3];
 
-	cout << "about to start iterator" << endl;
+	//cout << "about to start iterator" << endl;
 	for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
 	{ //auto  iter = inputTrainingExamplesStartIterator; 
 
-		printf("%s\n", iter->filename.c_str());
+		//printf("%s\n", iter->filename.c_str());
 
 		const cv::Mat &sourceImage = iter->sourceImage;
 		const cv::Mat_<bool> &notWaterBitmap = iter->notWaterBitmap;
@@ -64,20 +64,20 @@ void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &in
 				//const cv::Point3f &pixelColor =  sourceImage.at<cv::Point3f >(i,a);
 				if( (pixelCount < totalPixels) && ((currentPixelIsNotWater && (pixelCount%2==0)) || (!currentPixelIsNotWater && (pixelCount%2==1) )  ) ) {
 					//if ( pixelCount < totalPixels) {
-					cout << " getting BGR values ";
+					//cout << " getting BGR values ";
 					Vec3b intensity = sourceImage.at<Vec3b>(i,a);
 					trainingData[pixelCount][0] = intensity[0];
 					trainingData[pixelCount][1] = intensity[1];
 					trainingData[pixelCount][2] = intensity[2];
 
-					cout << trainingData[pixelCount][0] << " ";
-					cout << trainingData[pixelCount][1] << " "; 			;
-					cout << trainingData[pixelCount][2] << endl; 		
+					//cout << trainingData[pixelCount][0] << " ";
+					//cout << trainingData[pixelCount][1] << " "; 			;
+					//cout << trainingData[pixelCount][2] << endl; 		
 
 					if (  !(labels[pixelCount])) {
-						labels[pixelCount] = -1.0;
-					} else {
 						labels[pixelCount] = 1.0;
+					} else {
+						labels[pixelCount] = -1.0;
 					}
 
 					pixelCount++;
@@ -89,34 +89,52 @@ void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &in
 		}
 	}
 
-		cout <<"pixel count " <<  pixelCount << endl;
-		// Once we have the training data, we put it in a basic struct
-		for(int index = 0; index < pixelCount; index++)
+	//cout <<"pixel count " <<  pixelCount << endl;
+	// Once we have the training data, we put it in a basic struct
+	for(int index = 0; index < pixelCount; index++)
+	{
+		if(fabs(labels[index] - 1.0) > .01 && fabs(labels[index] + 1.0) > .01)
 		{
-			if(fabs(labels[index] - 1.0) > .01 && fabs(labels[index] + 1.0) > .01)
-			{
-				cout << "Error in labels at location " << index << endl;
-				abort(); 
-			}
+			cout << "Error in labels at location " << index << endl;
+			abort(); 
 		}
+	}
 
-		Mat labelsMat(totalPixels, 1, CV_32FC1, labels);
-		Mat trainingDataMat(totalPixels, 3, CV_32FC1, trainingData);
+	Mat labelsMat(totalPixels, 1, CV_32FC1, labels);
+	Mat trainingDataMat(totalPixels, 3, CV_32FC1, trainingData);
 
-		// Set up SVM's parameters
-		CvSVMParams params;
-		params.svm_type    = CvSVM::C_SVC;
-		//params.gamma           = 2;
-		//params.coef0           = 1;
-		params.C           = 100;
-		params.kernel_type = CvSVM::LINEAR;
-		params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, int(1e7), 1e-6);
+	// Set up SVM's parameters
+	CvSVMParams params;
+	params.svm_type    = CvSVM::C_SVC;
+	// Read in the parameters from file
+	int lineCount = 0;
+	std::ifstream paramFile("./RBFvalues.txt");
+	std::vector<float>svmFileParams;
+	float number;
+	if (paramFile.is_open()) {
+        while((! paramFile.eof())&& (lineCount<2 )) {
+                                    
+        paramFile >> number;
+	svmFileParams.push_back(number);
+        lineCount++;
+        }
+	}
 
-		// Train the SVM
-		cout << "Create SVM" << endl;
-		cout << "Starting training process" << endl;
-		svm.train(trainingDataMat, labelsMat, Mat(), Mat(), params);
-		cout << "Finished training" << endl;
+	printf("%f, %f\n",svmFileParams[0],svmFileParams[1]);
+
+	params.gamma           = svmFileParams[1];
+	//params.coef0           = 1;
+	params.C           = svmFileParams[0]; //10^x
+	params.kernel_type = CvSVM::RBF;
+	params.term_crit   = cvTermCriteria(CV_TERMCRIT_ITER, int(1e7), 1e-6);
+
+	// Train the SVM
+	cout << " Total Pixels " << totalPixels;
+	cout << " ************ RBF classifier: params.C: " << params.C << " gamma: " << params.gamma << endl;
+	//cout << "Create SVM" << endl;
+	//cout << "Starting training process" << endl;
+	svm.train(trainingDataMat, labelsMat, Mat(), Mat(), params);
+	//cout << "Fnished training" << endl;
 }
 
 /**
@@ -134,40 +152,40 @@ void SVMClassifier::reset()
  */
 std::tuple<double, double, double> SVMClassifier::test(const std::vector<trainingExample>::const_iterator &inputTrainingExamplesStartIterator, const  std::vector<trainingExample>::const_iterator &inputTrainingExamplesEndIterator)
 {
-int64_t numberOfTestExamples = inputTrainingExamplesEndIterator - inputTrainingExamplesStartIterator;
-int64_t numberOfFalsePositives = 0;
-int64_t numberOfFalseNegatives = 0;
+	int64_t numberOfTestExamples = inputTrainingExamplesEndIterator - inputTrainingExamplesStartIterator;
+	int64_t numberOfFalsePositives = 0;
+	int64_t numberOfFalseNegatives = 0;
 
-//printf("\n\nTesting\n");
-for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
-{
-//printf("%s\n", iter->filename.c_str());
-bool classifiedAsNotWater = classify(*iter);
+	//printf("\n\nTesting\n");
+	for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
+	{
+		//printf("%s\n", iter->filename.c_str());
+		bool classifiedAsNotWater = classify(*iter);
 
-if(!classifiedAsNotWater)
-{
-if(!iter->isWaterImage)
-{
-numberOfFalseNegatives++;
-}
-}
-else
-{
-if(iter->isWaterImage)
-{
-numberOfFalsePositives++;
-}
-}
-}
-
-
+		if(!classifiedAsNotWater)
+		{
+			if(!iter->isWaterImage)
+			{
+				numberOfFalseNegatives++;
+			}
+		}
+		else
+		{
+			if(iter->isWaterImage)
+			{
+				numberOfFalsePositives++;
+			}
+		}
+	}
 
 
-double averageFalsePositiveRate = ((double) numberOfFalsePositives) / numberOfTestExamples;
-double averageFalseNegativeRate = ((double) numberOfFalseNegatives) / numberOfTestExamples;
-double averageErrorRate = averageFalsePositiveRate+averageFalseNegativeRate;
 
-return std::tuple<double, double, double>(averageErrorRate, averageFalsePositiveRate, averageFalseNegativeRate);
+
+	double averageFalsePositiveRate = ((double) numberOfFalsePositives) / numberOfTestExamples;
+	double averageFalseNegativeRate = ((double) numberOfFalseNegatives) / numberOfTestExamples;
+	double averageErrorRate = averageFalsePositiveRate+averageFalseNegativeRate;
+
+	return std::tuple<double, double, double>(averageErrorRate, averageFalsePositiveRate, averageFalseNegativeRate);
 }
 
 /**
@@ -178,33 +196,33 @@ return std::tuple<double, double, double>(averageErrorRate, averageFalsePositive
  */
 std::tuple<std::vector<cv::Mat_<bool>>, double, double, double> SVMClassifier::calculateSegmentations(const std::vector<trainingExample>::const_iterator &inputTrainingExamplesStartIterator, const std::vector<trainingExample>::const_iterator &inputTrainingExamplesEndIterator)
 {
-double errorRateSum = 0.0;
-double falsePositiveRateSum = 0.0;
-double falseNegativeRateSum = 0.0;
-std::vector<cv::Mat_<bool>> segmentations;
+	double errorRateSum = 0.0;
+	double falsePositiveRateSum = 0.0;
+	double falseNegativeRateSum = 0.0;
+	std::vector<cv::Mat_<bool>> segmentations;
 
-//printf("\n\nSegmenting\n");
-for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
-{
-//printf("%s\n", iter->filename.c_str());
+	//printf("\n\nSegmenting\n");
+	for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
+	{
+		//printf("%s\n", iter->filename.c_str());
 
-double errorRate, falsePositiveRate, falseNegativeRate;
-cv::Mat_<bool> segmentation;
-std::tie(segmentation, errorRate, falsePositiveRate, falseNegativeRate) = segment(*iter);
+		double errorRate, falsePositiveRate, falseNegativeRate;
+		cv::Mat_<bool> segmentation;
+		std::tie(segmentation, errorRate, falsePositiveRate, falseNegativeRate) = segment(*iter);
 
-segmentations.push_back(segmentation);
-errorRateSum += errorRate;
-falsePositiveRateSum += falsePositiveRate;
-falseNegativeRateSum += falseNegativeRateSum;
-}
+		segmentations.push_back(segmentation);
+		errorRateSum += errorRate;
+		falsePositiveRateSum += falsePositiveRate;
+		falseNegativeRateSum += falseNegativeRateSum;
+	}
 
 
 
-double averageErrorRate = errorRateSum / segmentations.size();
-double averageFalsePositiveRate = falsePositiveRateSum / segmentations.size();
-double averageFalseNegativeRate = falseNegativeRateSum / segmentations.size();
+	double averageErrorRate = errorRateSum / segmentations.size();
+	double averageFalsePositiveRate = falsePositiveRateSum / segmentations.size();
+	double averageFalseNegativeRate = falseNegativeRateSum / segmentations.size();
 
-return std::tuple<std::vector<cv::Mat_<bool>>, double, double, double>(segmentations, averageErrorRate, averageFalsePositiveRate, averageFalseNegativeRate);
+	return std::tuple<std::vector<cv::Mat_<bool>>, double, double, double>(segmentations, averageErrorRate, averageFalsePositiveRate, averageFalseNegativeRate);
 }
 
 /**
@@ -302,7 +320,7 @@ std::tuple<cv::Mat_<bool>, double, double, double, bool> SVMClassifier::classify
  */
 cv::Mat_<bool> SVMClassifier::segment(const cv::Mat &inputImage)
 {
-		cv::Mat_<bool> segmentation(inputImage.rows, inputImage.cols);
+	cv::Mat_<bool> segmentation(inputImage.rows, inputImage.cols);
 
 	int totalPixels = 333*500;
 
@@ -315,7 +333,7 @@ cv::Mat_<bool> SVMClassifier::segment(const cv::Mat &inputImage)
 		{
 
 			//printf("%s\n", iter->filename.c_str());
-			Vec3b intensity = inputImage.at<Vec3b>(a,i);
+			Vec3b intensity = inputImage.at<Vec3b>(i,a);
 			float inputData[3];			
 			inputData[0]= intensity[0];
 			inputData[1]= intensity[1];
