@@ -39,13 +39,7 @@ void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &in
 	int64_t pixelCount = 0;
 	int64_t waterPixelCount = 0;
 	//int64_t numberOfTestExamples = inputTrainingExamplesEndIterator - inputTrainingExamplesStartIterator;
-	<<<<<<< HEAD
 		int width = 500, height = 333;
-	=======
-		//int64_t numberOfTestExamples = 2;
-		int width = 500, height = 333;
-	//int totalPixels = ((int)numberOfTestExamples)* width*height;
-	>>>>>>> 42ef2901b001366368b3db00cbe9ffa64027da31
 		//int totalPixels = width*height;
 		int totalPixels = 10000;
 	cout << totalPixels << endl;
@@ -66,7 +60,7 @@ void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &in
 			for(int64_t a=0; a<sourceImage.cols; a++)
 			{
 				bool currentPixelIsNotWater  = notWaterBitmap.at<bool>(i,a);
-				bool labels[pixelCount]      = notWaterBitmap.at<bool>(i,a);
+				labels[pixelCount]      = notWaterBitmap.at<bool>(i,a);
 				//const cv::Point3f &pixelColor =  sourceImage.at<cv::Point3f >(i,a);
 				if( (pixelCount < totalPixels) && ((currentPixelIsNotWater && (pixelCount%2==0)) || (!currentPixelIsNotWater && (pixelCount%2==1) )  ) ) {
 					//if ( pixelCount < totalPixels) {
@@ -129,56 +123,40 @@ void SVMClassifier::reset()
  */
 std::tuple<double, double, double> SVMClassifier::test(const std::vector<trainingExample>::const_iterator &inputTrainingExamplesStartIterator, const  std::vector<trainingExample>::const_iterator &inputTrainingExamplesEndIterator)
 {
-	int64_t numberOfTestExamples = inputTrainingExamplesEndIterator - inputTrainingExamplesStartIterator;
-	int64_t numberOfFalsePositives = 0;
-	int64_t numberOfFalseNegatives = 0;
-	bool isNotWater;
+int64_t numberOfTestExamples = inputTrainingExamplesEndIterator - inputTrainingExamplesStartIterator;
+int64_t numberOfFalsePositives = 0;
+int64_t numberOfFalseNegatives = 0;
 
-	//printf("\n\nTesting\n");
-	for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
-	{
-		const cv::Mat &sourceImage = iter->sourceImage;
-		const cv::Mat_<bool> &notWaterBitmap = iter->notWaterBitmap;
-		for(int64_t i=0; i<sourceImage.rows; i++)
-		{
-			for(int64_t a=0; a<sourceImage.cols; a++)
-			{
-				if (response < 0) 
-				{
-					isNotWater = 0;
-					waterpxCount++;
-				} else {
-					isNotWater = 1;
-					notWaterpxCount++;
-				}
-				bool classifiedAsNotWater = isNotWater;
+//printf("\n\nTesting\n");
+for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
+{
+//printf("%s\n", iter->filename.c_str());
+bool classifiedAsNotWater = classify(*iter);
 
-				if(!classifiedAsNotWater)
-				{
-					if(!iter->isWaterImage)
-					{
-						numberOfFalseNegatives++;
-					}
-				}
-				else
-				{
-					if(iter->isWaterImage)
-					{
-						numberOfFalsePositives++;
-					}
-				}
-			}
-		}
-	}
+if(!classifiedAsNotWater)
+{
+if(!iter->isWaterImage)
+{
+numberOfFalseNegatives++;
+}
+}
+else
+{
+if(iter->isWaterImage)
+{
+numberOfFalsePositives++;
+}
+}
+}
 
 
 
 
-	double averageFalsePositiveRate = ((double) numberOfFalsePositives) / numberOfTestExamples;
-	double averageFalseNegativeRate = ((double) numberOfFalseNegatives) / numberOfTestExamples;
-	double averageErrorRate = averageFalsePositiveRate+averageFalseNegativeRate;
+double averageFalsePositiveRate = ((double) numberOfFalsePositives) / numberOfTestExamples;
+double averageFalseNegativeRate = ((double) numberOfFalseNegatives) / numberOfTestExamples;
+double averageErrorRate = averageFalsePositiveRate+averageFalseNegativeRate;
 
-	return std::tuple<double, double, double>(averageErrorRate, averageFalsePositiveRate, averageFalseNegativeRate);
+return std::tuple<double, double, double>(averageErrorRate, averageFalsePositiveRate, averageFalseNegativeRate);
 }
 
 /**
@@ -189,33 +167,33 @@ std::tuple<double, double, double> SVMClassifier::test(const std::vector<trainin
  */
 std::tuple<std::vector<cv::Mat_<bool>>, double, double, double> SVMClassifier::calculateSegmentations(const std::vector<trainingExample>::const_iterator &inputTrainingExamplesStartIterator, const std::vector<trainingExample>::const_iterator &inputTrainingExamplesEndIterator)
 {
-	double errorRateSum = 0.0;
-	double falsePositiveRateSum = 0.0;
-	double falseNegativeRateSum = 0.0;
-	std::vector<cv::Mat_<bool>> segmentations;
+double errorRateSum = 0.0;
+double falsePositiveRateSum = 0.0;
+double falseNegativeRateSum = 0.0;
+std::vector<cv::Mat_<bool>> segmentations;
 
-	//printf("\n\nSegmenting\n");
-	for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
-	{
-		//printf("%s\n", iter->filename.c_str());
+//printf("\n\nSegmenting\n");
+for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
+{
+//printf("%s\n", iter->filename.c_str());
 
-		double errorRate, falsePositiveRate, falseNegativeRate;
-		cv::Mat_<bool> segmentation;
-		std::tie(segmentation, errorRate, falsePositiveRate, falseNegativeRate) = segment(*iter);
+double errorRate, falsePositiveRate, falseNegativeRate;
+cv::Mat_<bool> segmentation;
+std::tie(segmentation, errorRate, falsePositiveRate, falseNegativeRate) = segment(*iter);
 
-		segmentations.push_back(segmentation);
-		errorRateSum += errorRate;
-		falsePositiveRateSum += falsePositiveRate;
-		falseNegativeRateSum += falseNegativeRateSum;
-	}
+segmentations.push_back(segmentation);
+errorRateSum += errorRate;
+falsePositiveRateSum += falsePositiveRate;
+falseNegativeRateSum += falseNegativeRateSum;
+}
 
 
 
-	double averageErrorRate = errorRateSum / segmentations.size();
-	double averageFalsePositiveRate = falsePositiveRateSum / segmentations.size();
-	double averageFalseNegativeRate = falseNegativeRateSum / segmentations.size();
+double averageErrorRate = errorRateSum / segmentations.size();
+double averageFalsePositiveRate = falsePositiveRateSum / segmentations.size();
+double averageFalseNegativeRate = falseNegativeRateSum / segmentations.size();
 
-	return std::tuple<std::vector<cv::Mat_<bool>>, double, double, double>(segmentations, averageErrorRate, averageFalsePositiveRate, averageFalseNegativeRate);
+return std::tuple<std::vector<cv::Mat_<bool>>, double, double, double>(segmentations, averageErrorRate, averageFalsePositiveRate, averageFalseNegativeRate);
 }
 
 /**
@@ -293,14 +271,9 @@ std::tuple<cv::Mat_<bool>, double, double, double, bool> SVMClassifier::classify
 		}
 	}
 
-	double proportionOfPixelsWater = ((double) estimatedCountOfWaterPixelsInImage) / (numberOfPixelsInImage);
 
 	//If the proportion of pixels classified water closer to that expected in a water image than it is in a not water image, classify it as a water image
 	bool classifyAsWaterImage = false;
-	if(fabs(fractionOfPixelsWaterInWaterImages - proportionOfPixelsWater) < fabs(fractionOfPixelsWaterInNotWaterImages - proportionOfPixelsWater))
-	{
-		classifyAsWaterImage = true;
-	}
 
 	double falsePositiveRate = ((double) falsePositiveCount) / numberOfPixelsInImage;
 	double falseNegativeRate = ((double) falseNegativeCount) / numberOfPixelsInImage;
@@ -318,11 +291,9 @@ std::tuple<cv::Mat_<bool>, double, double, double, bool> SVMClassifier::classify
  */
 cv::Mat_<bool> SVMClassifier::segment(const cv::Mat &inputImage)
 {
-	<<<<<<< HEAD
 		cv::Mat_<bool> segmentation(inputImage.rows, inputImage.cols);
 	bool isNotWater;
 
-	bool isNotWater;
 	int totalPixels = 333*500;
 	float inputData[totalPixels][3];
 	int pixelCount = 0;
