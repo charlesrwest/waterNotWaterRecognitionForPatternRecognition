@@ -70,7 +70,11 @@ boost::filesystem::create_directory(outputDirectoryPath);
 //Shuffle the training/test data (inefficient, but doesn't matter to much in this case)
 unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
-shuffle(trainingAndTestData.begin(), trainingAndTestData.end(), std::default_random_engine(seed));
+//shuffle(trainingAndTestData.begin(), trainingAndTestData.end(), std::default_random_engine(seed));
+
+shuffle(trainingAndTestData.begin(), trainingAndTestData.end(), std::default_random_engine(9809809853));//Shuffle, but the same way every time
+
+//Disabled shuffling
 
 int numberOfTestExamples = trainingAndTestData.size() * inputTestFraction;
 int numberOfTrainingExamples = trainingAndTestData.size()-numberOfTestExamples;
