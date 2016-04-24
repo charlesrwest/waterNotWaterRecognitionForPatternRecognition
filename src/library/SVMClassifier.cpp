@@ -41,7 +41,7 @@ void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &in
 	//int64_t numberOfTestExamples = inputTrainingExamplesEndIterator - inputTrainingExamplesStartIterator;
 		int width = 500, height = 333;
 		//int totalPixels = width*height;
-		int totalPixels = 10000;
+		int totalPixels = 100;
 	cout << totalPixels << endl;
 	float labels[totalPixels ];
 	float trainingData[totalPixels][3];
@@ -87,8 +87,19 @@ void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &in
 
 
 		}
+	}
+
 		cout <<"pixel count " <<  pixelCount << endl;
 		// Once we have the training data, we put it in a basic struct
+		for(int index = 0; index < pixelCount; index++)
+		{
+			if(fabs(labels[index] - 1.0) > .01 && fabs(labels[index] + 1.0) > .01)
+			{
+				cout << "Error in labels at location " << index << endl;
+				abort(); 
+			}
+		}
+
 		Mat labelsMat(totalPixels, 1, CV_32FC1, labels);
 		Mat trainingDataMat(totalPixels, 3, CV_32FC1, trainingData);
 
@@ -105,7 +116,7 @@ void SVMClassifier::train(const std::vector<trainingExample>::const_iterator &in
 		cout << "Create SVM" << endl;
 		cout << "Starting training process" << endl;
 		svm.train(trainingDataMat, labelsMat, Mat(), Mat(), params);
-	}
+		cout << "Finished training" << endl;
 }
 
 /**
@@ -292,15 +303,8 @@ std::tuple<cv::Mat_<bool>, double, double, double, bool> SVMClassifier::classify
 cv::Mat_<bool> SVMClassifier::segment(const cv::Mat &inputImage)
 {
 		cv::Mat_<bool> segmentation(inputImage.rows, inputImage.cols);
-	bool isNotWater;
 
 	int totalPixels = 333*500;
-	float inputData[totalPixels][3];
-	int pixelCount = 0;
-	int waterpxCount = 0;
-	int notWaterpxCount = 0;
-	Mat input_mat(totalPixels,3,CV_32FC1);
-	cout <<" total pixels "  << totalPixels;
 
 	//printf("\n\nTesting\n");
 	//for(auto iter = inputTrainingExamplesStartIterator; iter != inputTrainingExamplesEndIterator; iter++)
@@ -312,26 +316,22 @@ cv::Mat_<bool> SVMClassifier::segment(const cv::Mat &inputImage)
 
 			//printf("%s\n", iter->filename.c_str());
 			Vec3b intensity = inputImage.at<Vec3b>(a,i);
-			inputData[pixelCount][0]= intensity[0];
-			inputData[pixelCount][1]= intensity[1];
-			inputData[pixelCount][2]= intensity[2];
-			cout << inputData[pixelCount][0] << " ";
-			cout << inputData[pixelCount][1] << " "; 			;
-			cout << inputData[pixelCount][2] << " "; 		
+			float inputData[3];			
+			inputData[0]= intensity[0];
+			inputData[1]= intensity[1];
+			inputData[2]= intensity[2];
+			//cout << inputData[0] << " ";
+			//cout << inputData[1] << " "; 			;
+			//cout << inputData[2] << " "; 		
 			Mat inputDataMat(1, 3, CV_32FC1, inputData);
-			pixelCount++;
-			cout << " pixelCount" << pixelCount;
 
 			float response = svm.predict(inputDataMat);
 
-			cout << " response : " << response << endl;
+			//cout << " response : " << response << endl;
 			segmentation.at<bool>(i,a) = response > 0;
 		}
 	}
-	cout << " Image #" << imgCount;
-	cout <<" total pixels "  << totalPixels;
-	cout <<" water pixels "  << waterpxCount;
-	cout <<" nonwater pixels "  << notWaterpxCount<< endl;
+	//cout << " Image #" << imgCount;
 	imgCount++;
 
 	return segmentation;
