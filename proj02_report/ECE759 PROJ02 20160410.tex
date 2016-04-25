@@ -182,7 +182,14 @@ mis-predictions C may be increased to improve the data's complexity and shape.
 For this project C and gamma were varied on a logarithmic scale from $10^{-5}$ to $10^5$ as a way to decide on the optimal parameters for accurate classification.
 
 	\subsubsection{Implementation}
-	We implemented the SVM using OpenCV's SVM functions. We ran the SVM using a linear classifier with parameters set for a linearly non-separable dataset. We also tested SVM using radial basis functions which assume non-linearly separable classes. 
+	We implemented the SVM using OpenCV's SVM functions. We ran the SVM using a linear classifier with parameters set for a linearly non-separable dataset. We also tested SVM using radial basis functions which assume non-linearly separable classes.\\
+	\\ 
+	OpenCV is an open sourced library of functions available in C, C++, python and java. The library we used to implement the SVM was the machine learning library using C++. Overall opencv is a great tool, with wonderful documentation although the
+	learning curve on using such tools is steep for someone using them for the first time.\\
+	\\
+	Three features were extracted from each pixel of an the training images. The features were blue, green and red values between 0 and 255. The feature vectors were
+	converted into floating point numbers in order to be used to train the SVM. The order of
+	the images were shuffled randomly each time the SVM was run in order to have valid results. 
 	\subsection{Detecting and Classifying "Water" vs. "Non-water" Regions}
 	\subsubsection{Features Chosen}
 	All work on features was performed in MATLAB, in some cases in the IBM Virtual Computing Lab. We had only the Image Processing toolbox available. For this reason, we focused on color spaces and gradient. In Project 1 we focused exclusively on the RGB ("Red/Green/Blue") color space. We decided to see if other color spaces could provide additional useful information. We also decided to include the magitude and direction of the gradient. Since areas of water generally don't have a lot of edges, we hoped that this would help identify water. Color spaces used were RGB, HSV (Hue/Saturation/Value) and YCbCr which provides luminance (Y) and chrominance (Cb and Cr) information.\\
@@ -255,7 +262,9 @@ For this project C and gamma were varied on a logarithmic scale from $10^{-5}$ t
 	While the per pixel Bayesian classifier outperformed the neural network classifier, there are some interesting differences between their output.  In general, the neural network classifier was much more consistent in its choices due to looking at multiple pixels in the image.  It also tended to deal better with reflections.  That said, it had trouble telling the difference between water and sky and still only examined a small portion of the scene.  Overall, the neural network approach appears to have significant promise (particularly if it is possible to adapt the lower levels of a professional convolutional network), but technical limitations made it difficult to realize that potential in the context of this project.
 
 	\subsection{SVM}
-	[Describe results of SVM here]
+	Due to technical difficulties with the SVM code, we were unable to get visual output for this classification algorithm. We were able to attain error rates as low as .24. It is unclear for what value sof C and $\gamma$ this value was attained. Unfortunately, further testing showed that for a given set of parameter values for C and $\gama$, wide variations in the error were attained. In some cases, we were getting an error rate of greater than 50\%. We believe this is because of the way in which we passed the training data. We had to pass it 2500 pixels at a time. We decided to attempt to shrink the images to see if we could pass it a higher proportion of an image. However, we were unable to attain results from this fix.  \\
+	\\
+	While we attained an error rate using SVM that was less than either Bayes or CNN, we do not feel that our implementation of SVM was able to provide increased accuracy consistently. 
 	
 	\subsection{Detecting and Classifying "Water" vs. "Non-water" Regions}
 	\subsubsection{Scatter Matrices}
