@@ -39,19 +39,23 @@ In this section, we briefly describe the techniques we explored in general. In t
 \subsection{Neural Network}
 Convolutional neural networks ('CNNs') deliver state of the art performance in image classification and segmentation, delivering strong results with large datasets such as ImageNet.  There are a few key factors that have allowed CNNs to reach this level of performance.  It is well known that increasing the amount of training data provided to a good method increases performance and generalization.  Neural networks are capable of productively utilizing nearly unlimited amounts of training data, primarily constrained by memory and processing speeds.\\
 \\
-CNNs are especially well-suited to image processing due to their spacial coherence.  Rather than using fully connected neurons which examine the whole image at once (thereby introducing a extremely large number of parameters), CNNs learn filters instead which are then applied to the full image.  This drastically reduces the number of parameters per layer of the network and introduces natural translation invariance due to the identical treatment of each pixel (since the filter is applied at every offset in the network).  This approach evolves filters that have been identified as similar to the filters that have been manually produced in computer vision literature via exhaustive analysis, while producing new and interesting filters that had not been previously identified in higher layers.  Since some of these filters/features appear to be universal among images (such as edge detection), it has become a common practice to take layers with pre-trained weights from top performing networks and then retrain with other top layers and data sets to create new classifiers.  This practice allows much smaller training sets to be used that are still able to generate good/generalizable results, essentially borrowing features from otherwise unrelated training data.
+CNNs are especially well-suited to image processing due to their spacial coherence.  Rather than using fully connected neurons which examine the whole image at once (thereby introducing a extremely large number of parameters), CNNs learn filters instead which are then applied to the full image.  This drastically reduces the number of parameters per layer of the network and introduces natural translation invariance due to the identical treatment of each pixel (since the filter is applied at every offset in the network).  This approach evolves filters that have been identified as similar to the filters that have been manually produced in computer vision literature via exhaustive analysis, while producing new and interesting filters that had not been previously identified in higher layers.  Since some of these filters/features appear to be universal among images (such as edge detection), it has become a common practice to take layers with pre-trained weights from top performing networks and then retrain with other top layers and data sets to create new classifiers.  This practice allows much smaller training sets to be used that are still able to generate good/generalizable results, essentially borrowing features from otherwise unrelated training data.\\
 \\
-CNNs work extremely well for complex images and scenes but require large amounts of data (unless the layer borrowing method is used), since the network is essentially having to recreate how vision works from scratch when it starts training.  It is normal for the training sets for these networks to be on the order of a million images.  There are roughly 70 training/test images for this project, which implies that CNNs (and other methods) might have difficulty generalizing.
+CNNs work extremely well for complex images and scenes but require large amounts of data (unless the layer borrowing method is used), since the network is essentially having to recreate how vision works from scratch when it starts training.  It is normal for the training sets for these networks to be on the order of a million images.  There are roughly 70 training/test images for this project, which implies that CNNs (and other methods) might have difficulty generalizing.\\
 \\
-One of the key enabling factors for the high performance of modern neural networks is their ability to use high power GPUs to reduce training time by a factor of 100 or more.  This allows the networks to both have high complexity and handle large amounts of data.  However, this GPU dependence also makes it significantly more difficult to setup and train large neural networks because specialized/experimental libraries and expensive hardware required to get fast results.  Effectively, training convolutional neural networks requires a certain amount of software engineering expertise just to get started.\\
-(TRANSITION PARAGRAPH)
+One of the key enabling factors for the high performance of modern neural networks is their ability to use high power GPUs to reduce training time by a factor of 100 or more.  This allows the networks to both have high complexity and handle large amounts of data.  However, this GPU dependence also makes it significantly more difficult to setup and train large neural networks because specialized/experimental libraries and expensive hardware required to get fast results.  Effectively, training CNNs requires a certain amount of software engineering expertise just to get started.\\
+\\
 \subsection{Support Vector Machine ("SVM")}
 Support Vector Machines are another technique used to classify data. When classifying linearly separable data, SVM maximizes the distance between the two classes which improves generalizability for new data. In essence, it creates the maximum buffer between the classes so that testing points are more accurately assigned to their appropriate class. In the case of non-separable data, the algorithm adds an additional constraint of minimizing the mis-classification that occurs in the training data. Convex optimization is at the root of SVM's optimality\cite{haykin2009neural}.\\
+\\
 In cases where classes are non-linearly separable, we are able to employ kernels which convert the given feature space to a higher dimensional and hopefully more separable space. Popular kernel functions include polynomials, radial basis functions and the hyperbolic tangent\cite{theodoridis2009pattern}.
 \subsection{Feature Selection}
 Feature selection is a key process in classifying data. Some features will be better suited to a classification problem then others. Ideal features will linearly separate the classes such that data points in the same cluster are close together and data points in different clusters are far apart. Even if the features are not linearly separable, it will be best if they are able to separate the classes in space.\\
+\\
 One of the issues involved in trying to identify whether features are well chosen is that the vectors are frequently larger than 3 in dimension which means there is no way to visualize the data points in relation to each other. One of the measures that can be used to identify how well spaced data points are is to use scatter matrices and calculations which use them. Scatter matrices quantify the between cluster and within cluster distance. Feature vectors for which the within cluster distance is very small (low variance) and for which between cluster distance is large (i.e., the data is very separated) is desirable. \\
-Additional information can be gained from calculations with utilize information in these matrices. [DESCRIBE J1-J3].\\
+\\
+Additional information can be gained from calculations with utilize information in these matrices. \\
+\\
 Another tool that can be used to deal with feature vectors is Principal Components Analysis (PCA). PCA quantifies the axis along which maximal variance in the data points occurs. It is possible to identify these axes and a basis which more separates the data. 
 \subsection{Unsupervised classification}
 Unsupervised classification is used in cases where labels are not available. Unsupervised methods include: sequential, hierarchical, hard clustering, fuzzy clustering, boundary detection algorithms and ones which perform cost optimization. Each of these methods requires the choice of certain parameters. The optimal values for these parameters are not always easily identifiable. An additional issue with unsupervised classification is identifying the significance of the generated clusters. It is frequently difficult to describe the meaning of the clustering in the context of the data. The significance is highly data-dependent. For instance. clusters of gene expression data has been associated with genes which are involved in the same process (co-expressed). It is unclear what the clusters mean for color spaces. However, when we clustered water pixels exclusively in Project 1, it seemed as if the clusters corresponded to "shadows".
@@ -166,6 +170,7 @@ To implement a CNN, we utilized a couple of different C++ libraries which we emb
 	The ResNet-inspired CNN was trained for a day and a half on a Thinkpad laptop.  Its segmentations appeared to be random noise, so the network was simplified, reducing both the number of layers and  number of filters in each layer.  This new network was also trained for one and a half days.  However, it also just produced random noise as its segmentation.  As the duration of the project was nearing an end and it seemed probable that an issue with Caffe was causing the problem, it was decided to focus on the TinyCNN based fully connected neural network.  It was trained for an additional 3 days, ultimately delivering a per pixel classification error of 33.9%.
 	\subsection{SVM}
 	\subsubsection{Parameter Choice} In the case of using SVM on linearly non-separable data, we played with a parameter, C, which related to the extent of wrongly categorized data points (this parameter when set to 0 assumes linearly separable data).\\
+\\
 	The parameters we tuned when using radial basis functions were C and $\gamma$. 
 The lower the C parameter, the smoother the decision line surface. A high value for C tries to classify all training examples
 correctly by allowing more training samples to be selected as support vectors. This makes the decision line much less smooth. It should
@@ -174,7 +179,7 @@ The other parameter associated with the RBF kernel is gamma. The classification 
 not capture the shape of the data, making it more difficult to become linearly seperable when the data is projected to a lower dimension. 
 Smaller values of gamma allow for linear seperability. If a model is too smooth, which may correspond to low values of gamma, and possibly increase in 
 mis-predictions C may be increased to improve the data's complexity and shape. 
-For this project C and gamma were varied on a logarithmic scale from 10^-5 to 10^5 as a way to decide on the optimal parameters for accurate classification.
+For this project C and gamma were varied on a logarithmic scale from $10^{-5}$ to $10^5$ as a way to decide on the optimal parameters for accurate classification.
 
 	\subsubsection{Implementation}
 	We implemented the SVM using OpenCV's SVM functions. We ran the SVM using a linear classifier with parameters set for a linearly non-separable dataset. We also tested SVM using radial basis functions which assume non-linearly separable classes. 
@@ -183,12 +188,13 @@ For this project C and gamma were varied on a logarithmic scale from 10^-5 to 10
 	All work on features was performed in MATLAB, in some cases in the IBM Virtual Computing Lab. We had only the Image Processing toolbox available. For this reason, we focused on color spaces and gradient. In Project 1 we focused exclusively on the RGB ("Red/Green/Blue") color space. We decided to see if other color spaces could provide additional useful information. We also decided to include the magitude and direction of the gradient. Since areas of water generally don't have a lot of edges, we hoped that this would help identify water. Color spaces used were RGB, HSV (Hue/Saturation/Value) and YCbCr which provides luminance (Y) and chrominance (Cb and Cr) information.\\
 	\subsubsection{Scatter Matrices}
 	Scatter matrices provide information on the cohesion and separation of data points in different classes. The within class scatter matrix, $S_w$, provides information about how close the data points are to their center. The between class scatter matrix, $S_b$, provides information on how close the centers of each class are to each other. The mixture scatter matrix is just $S_w + S_b$.\\
+\\
 	An ideal situation would be one where $S_w$ has very small values and $S_b$ has very large values. This would indicate that the datapoints for the classes were very cohesive and that the classes were well separated. 
 	A general measure that can be gained using the scatter matrices is called $J3=trace{S_w^{-1}S_m}$. Large values of this measure correlate with data which is well clustered and separated.
 	\subsubsection{Principal Components Analysis}
 	Principal Components Analysis (PCA) (also known as the Karhunen-Loeve Transform)is a way to transform data such that it is expressed in terms of the dimensions of greatest variance\cite{Shlens2003pca}. PCA can be used to reduce the redundancy and noise in a dataset. PCA can be performed in a couple of ways: one uses the eigenvectors of the covariance matrix of the variables and the other uses Singular Value Decomposition to identify a basis for the transformation. Ultimately the goal of PCA is to generate mutually uncorrelated sets of variables\cite{theodoridis2009pattern}.
 	\subsection{Unsupervised Clustering}
-	In Project 1 we utilized k-means to cluster data points which were labeled as water pixels. We were hoping that by creating two clusters of water pixels, we might be able to identify river bed. However, it seemed as if k-means identified shadows on the water more consistently.  In this project, we are asked to propose an unsupervised technique. We propose clustering all pixels in an image regardless of their label into one of two clusterings. We used k-means. We also clustered several images into three clusters to see if we could discern water vs. land vs. sky.  
+	In Project 1 we utilized k-means to cluster data points which were labeled as water pixels. We were hoping that by creating two clusters of water pixels, we might be able to identify river bed. However, it seemed as if k-means identified shadows on the water more consistently.  In this project, we are asked to propose an unsupervised technique. We propose clustering all pixels in an image regardless of their label into one of two clusterings. We used k-means. We also clustered several images into three clusters to see if we could discern water vs. land vs. sky. The only parameter we need to set for k-means is the number of clusters. We also chose to use the dissimilarity measure of Euclidean distance for this algorithm.
 	
 	
 \section{Results}
@@ -297,12 +303,38 @@ For this project C and gamma were varied on a logarithmic scale from 10^-5 to 10
 		\caption{The two principal components identified using MATLAB's pca()}
 	\end{figure}
 	The figure shows that these two components are highly uncorrelated. MATLAB indicated that 49.9\% of the variance in the data was explained by the first principal component, while 17.8\% of the variance was explained by the second component. 
+	\subsection{Unsupervised Cluster}
+	We chose to run k-means with k = 2 and k = 3 so that images were segmented into 2 or 3 partitions using the dissimilarity metric Euclidean distance. While it would be ideal if 2 clusters ended up being water and not water for two clusters. In general this did not happen.  Increasing k to 3 did not segment images into water, land and sky as hoped.  In fact in some ways the 3 clusters were less meaningful than than two clusters since in the case of two clusters, water was usually delineated, but was clustered with additional objects in the image.\\
+	We show the output for one image of the effect of clustering into 2 and 3 clusters.\\
+	
+	\begin{figure}
+	\begin{subfigure}{.33\textwidth}
+	  \centering
+	  \includegraphics[width=.9\linewidth]{./images/clustering/9731928435_8f83f7253e.png}
+	  \caption{Original Image}
+	\end{subfigure}%
+	\begin{subfigure}{.33\textwidth}
+	  \centering
+	  \includegraphics[width=.9\linewidth]{./images/clustering/image_23.jpg}
+	  \caption{Clustered into Two Clusters}
+	\end{subfigure}%
+	\begin{subfigure}{.33\textwidth}
+	  \centering
+	  \includegraphics[width=.9\linewidth]{./images/clustering/image_32.jpg}
+	  \caption{Clustered into Three Clusters}
+	\end{subfigure}%
+	\end{figure}
+	
+	It is clear that for the task of identifying water vs. non-water pixels, clustering will not automatically return in the two clusters water vs. non-water.
 
 
 \section{Discussion}
-In this Project we explored other classification algorithms and compared them to the Bayes Classifier.  As expected in cases where our algorithms were employing a linear separation, the Bayes Classifier performed the best. 
-Although, our CNN was designed to perform In general even though our classification problem is a highly non-linear one, the Bayes classifier did better 
-
+In this Project we explored other classification algorithms and compared them to the Bayes Classifier.  As expected in cases where our algorithms were employing a linear separation, the Bayes Classifier performed the best. \\
+\\ 
+In general even though our classification problem is a highly non-linear one, the Bayes classifier did better. However, we surmise that getting more training data and/or tweaking the CNN has the potential to generate better results.\\
+\\
+We also discovered that clustering the data in the images using Euclidean distance was not sufficient to identify water vs. non-water pixels. Particularly increasing the number of clusters to 3 to not see a huge improvement.
+\newpage
 \bibliographystyle{plain}
 % --------------------------------------------------------------
 %     You don't have to mess with anything below this line.
