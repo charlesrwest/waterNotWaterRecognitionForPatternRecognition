@@ -171,10 +171,13 @@ To implement a CNN, we utilized a couple of different C++ libraries which we emb
 	\subsection{Detecting and Classifying "Water" vs. "Non-water" Regions}
 	\subsubsection{Features Chosen}
 	All work on features was performed in MATLAB, in some cases in the IBM Virtual Computing Lab. We had only the Image Processing toolbox available. For this reason, we focused on color spaces and gradient. In Project 1 we focused exclusively on the RGB ("Red/Green/Blue") color space. We decided to see if other color spaces could provide additional useful information. We also decided to include the magitude and direction of the gradient. Since areas of water generally don't have a lot of edges, we hoped that this would help identify water. Color spaces used were RGB, HSV (Hue/Saturation/Value) and YCbCr which provides luminance (Y) and chrominance (Cb and Cr) information.\\
-	In order to see if we could find dimensions which most explained the variance in the data, we applied Principal Components Analysis using MATLAB's pca() function. \\
-	We calculated the scatter matrices on the data to determine whether the data points were separated by "water" vs. "non-water".
-	\subsubsection{Principal Components Analysis}
 	\subsubsection{Scatter Matrices}
+	Scatter matrices provide information on the cohesion and separation of data points in different classes. The within class scatter matrix, $S_w$, provides information about how close the data points are to their center. The between class scatter matrix, $S_b$, provides information on how close the centers of each class are to each other. The mixture scatter matrix is just $S_w + S_b$.\\
+	An ideal situation would be one where $S_w$ has very small values and $S_b$ has very large values. This would indicate that the datapoints for the classes were very cohesive and that the classes were well separated. 
+	A general measure that can be gained using the scatter matrices is called $J3=trace{S_w^{-1}S_m}$. Large values of this measure correlate with data which is well clustered and separated.
+	\subsubsection{Principal Components Analysis}
+	Principal Components Analysis (PCA) (also known as the Karhunen-Loeve Transform)is a way to transform data such that it is expressed in terms of the dimensions of greatest variance\cite{Shlens2003pca}. PCA can be used to reduce the redundancy and noise in a dataset. PCA can be performed in a couple of ways: one uses the eigenvectors of the covariance matrix of the variables and the other uses Singular Value Decomposition to identify a basis for the transformation. Ultimately the goal of PCA is to generate mutually uncorrelated sets of variables\cite{theodoridis2009pattern}.
+	
 	
 \section{Results}
 	\subsection{Neural Networks}
@@ -231,14 +234,53 @@ To implement a CNN, we utilized a couple of different C++ libraries which we emb
 
 \end{figure}
 
-	While the per pixel Bayesian classifier outperformed the neural network classifier, there are some interesting differences between their output.  In general, the neural network classifier was much more consistent in its choices due to looking a multiple pixels in the image.  It also tended to deal better with reflections.  That said, it had trouble telling the difference between water and the sky and still only examined a small portion of the scene.  Overall, the neural network approach appears to have significant promise (particularly if it is possible to adapt the lower levels of a professional convolutional network) but technical limitations appeared to make it difficult for that potential to be realized in this project.
+	While the per pixel Bayesian classifier outperformed the neural network classifier, there are some interesting differences between their output.  In general, the neural network classifier was much more consistent in its choices due to looking at multiple pixels in the image.  It also tended to deal better with reflections.  That said, it had trouble telling the difference between water and sky and still only examined a small portion of the scene.  Overall, the neural network approach appears to have significant promise (particularly if it is possible to adapt the lower levels of a professional convolutional network), but technical limitations made it difficult to realize that potential in the context of this project.
 
 	\subsection{SVM}
+	[Describe results of SVM here]
+	
 	\subsection{Detecting and Classifying "Water" vs. "Non-water" Regions}
-	During Project 1 we were very aware that using RGB as a feature did not lead to highly separable classes. However
+	During Project 1 we were very aware that using RGB as a feature did not lead to highly separable classes. However, even in light of this limitation we were still able to get a per image and per pixel error rate of between .2 and .3 (sometimes even less). Due to time and resource restrictions, we limited our investigation of feature vectors in Project 2 to the gradient and color spaces. 
+	We calculated the scatter matrices for 11 variables: Hue, Saturation, Value, Red, Green, Blue, Y (luminence), Cr and Cb (chrominance) and two variables that describe gradient: Magnitude and Direction. 
+	We calculated the following values for the data:
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{|l|c|}
+		\hline
+		Measure & Value\\
+		\hline
+		Trace-Within-Cluster Scatter Matrix & $2.9610 \times 10^4$\\
+		Trace-Between-Cluster Scatter Matrix & $34.1470$\\
+		J3 & 11.2405\\
+		\hline
+		\end{tabular}
+		\caption{Measures on 11 Data Variables}
+	\end{table}
+	For comparison, I refer to the results from Homework 4 in which we calculated the scatter matrices and J3 value on synthetic data in which the clusters were tightly bound situated far from each other. In this case, we got a J3 value of $9.7753 \times 10^3$. While this value comes from idealized data, it is safe to say that our J3 value suggests that we do not have cohesive and separated clusters.\\
+	We compared combinations of data to see how the J3 value changed depending on which variables we kept. The table below shows the results:\\
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			All Variables & HSV & RGB & CYK\\
+			\hline
+			\hline
+			11.2405 & 3.1427 & 3.1504 & 3.1503\\
+			& & &\\
+			\hline
+			Gradient & RGB \& Gradient & CYK \& Gradient & HSV \& Gradient\\	
+			\hline
+			\hline
+			2.0181 & 5.1663 & 5.1662 & 5.1559	\\
+			\hline
+		\end{tabular}
+		\caption{J3 values for different sets of variables}
+	\end{table}
 
 
 \section{Discussion}
+In this Project we explored other classification algorithms and compared them to the Bayes Classifier.  As expected in cases where our algorithms were employing a linear separation, the Bayes Classifier performed the best. 
+Although, our CNN was designed to perform In general even though our classification problem is a highly non-linear one, the Bayes classifier did better 
 
 \bibliographystyle{plain}
 % --------------------------------------------------------------
