@@ -182,7 +182,13 @@ mis-predictions C may be increased to improve the data's complexity and shape.
 For this project C and gamma were varied on a logarithmic scale from $10^{-5}$ to $10^5$ as a way to decide on the optimal parameters for accurate classification.
 
 	\subsubsection{Implementation}
+	OpenCV is an open sourced library of functions available in C, C++, python and java. The library we used to implement the SVM was the machine learning library using C++. Overall opencv is a great tool, with wonderful documentation although the 
+learning curve on using such tools is steep for someone using them for the first time. OpenCV requires a set of training samples which were provided as a set of images that accompanied the orignal water and not water photos. For every image in the training set, there was a bitmask image equivalent which darkened the water. These helped us provide labels for each pixel
+in the training data which was given to the SVM. 
 	We implemented the SVM using OpenCV's SVM functions. We ran the SVM using a linear classifier with parameters set for a linearly non-separable dataset. We also tested SVM using radial basis functions which assume non-linearly separable classes. 
+	Three features were extracted from each pixel of an the training images. The features were blue, green and red values between 0 and 255. The feature vectors were 
+converted into floating point numbers in order to be used to train the SVM. Due to the large number of pixels these images had in their current resolution, the training process hours.  The order of 
+the images were shuffled randomly each time the SVM was run in order to have valid results. 
 	\subsection{Detecting and Classifying "Water" vs. "Non-water" Regions}
 	\subsubsection{Features Chosen}
 	All work on features was performed in MATLAB, in some cases in the IBM Virtual Computing Lab. We had only the Image Processing toolbox available. For this reason, we focused on color spaces and gradient. In Project 1 we focused exclusively on the RGB ("Red/Green/Blue") color space. We decided to see if other color spaces could provide additional useful information. We also decided to include the magitude and direction of the gradient. Since areas of water generally don't have a lot of edges, we hoped that this would help identify water. Color spaces used were RGB, HSV (Hue/Saturation/Value) and YCbCr which provides luminance (Y) and chrominance (Cb and Cr) information.\\
@@ -255,7 +261,30 @@ For this project C and gamma were varied on a logarithmic scale from $10^{-5}$ t
 	While the per pixel Bayesian classifier outperformed the neural network classifier, there are some interesting differences between their output.  In general, the neural network classifier was much more consistent in its choices due to looking at multiple pixels in the image.  It also tended to deal better with reflections.  That said, it had trouble telling the difference between water and sky and still only examined a small portion of the scene.  Overall, the neural network approach appears to have significant promise (particularly if it is possible to adapt the lower levels of a professional convolutional network), but technical limitations made it difficult to realize that potential in the context of this project.
 
 	\subsection{SVM}
-	[Describe results of SVM here]
+Overall SVM performed worse then convolutional nueral networks, and Baye's theorem. Surprisingly the Linear seperator, with a parameter C did better than the radial basis function. The classification results increased in accuracy up to C = 1000 with an error rate from .37 to .42 from several runs for the linear separator, then later reached diminishing returns for any values higher than that. Computationally, it should be noted that the linear classifier took half the amount of time to train and run than the radial basis function. Below are some pictures which describe the changes: 
+\begin{figure}[h]
+\begin{subfigure}{.33\textwidth}
+	  \centering
+	  \includegraphics[width=.9\linewidth]{./images/svm/bayvSvm.png}
+	  \caption{Baye's Classifier}
+	\end{subfigure}%
+	\end{figure}
+	
+	\begin{figure}[h]
+\begin{subfigure}{.33\textwidth}
+	  \centering
+	  \includegraphics[width=.9\linewidth]{./images/svm/rbf.png}
+	  \caption{SVM using RBF for a kernel}
+	\end{subfigure}%
+	\end{figure}
+	
+	\begin{figure}[h]
+\begin{subfigure}{.33\textwidth}
+	  \centering
+	  \includegraphics[width=.9\linewidth]{./images/svm/linearSvm.png}
+	  \caption{Non linear SVM}
+	\end{subfigure}%
+	\end{figure}	
 	
 	\subsection{Detecting and Classifying "Water" vs. "Non-water" Regions}
 	\subsubsection{Scatter Matrices}
@@ -334,6 +363,8 @@ In this Project we explored other classification algorithms and compared them to
 In general even though our classification problem is a highly non-linear one, the Bayes classifier did better. However, we surmise that getting more training data and/or tweaking the CNN has the potential to generate better results.\\
 \\
 We also discovered that clustering the data in the images using Euclidean distance was not sufficient to identify water vs. non-water pixels. Particularly increasing the number of clusters to 3 to not see a huge improvement.
+For the SVM the largest limitation was how long it took to train the data. One interesting idea would be to shrink the images down, and run the SVM. 
+In most classifiers including Baye's the brightness of the sky was often confused with the reflective water pixels. One idea to help with differentiating between the two would be to assign more weights to the water pixels in the training data that were less reflective. 
 \newpage
 \bibliographystyle{plain}
 % --------------------------------------------------------------
