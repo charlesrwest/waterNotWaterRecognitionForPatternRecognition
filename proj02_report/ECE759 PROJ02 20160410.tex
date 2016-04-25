@@ -52,7 +52,7 @@ In cases where classes are non-linearly separable, we are able to employ kernels
 Feature selection is a key process in classifying data. Some features will be better suited to a classification problem then others. Ideal features will linearly separate the classes such that data points in the same cluster are close together and data points in different clusters are far apart. Even if the features are not linearly separable, it will be best if they are able to separate the classes in space.\\
 One of the issues involved in trying to identify whether features are well chosen is that the vectors are frequently larger than 3 in dimension which means there is no way to visualize the data points in relation to each other. One of the measures that can be used to identify how well spaced data points are is to use scatter matrices and calculations which use them. Scatter matrices quantify the between cluster and within cluster distance. Feature vectors for which the within cluster distance is very small (low variance) and for which between cluster distance is large (i.e., the data is very separated) is desirable. \\
 Additional information can be gained from calculations with utilize information in these matrices. [DESCRIBE J1-J3].\\
-Another tool that can be used to deal with feature vectors is Principal Components Analysis (PCA). PCA is a tool which quantifies the axis along which maximal variance in the data points is found. It is possible to identify these axes and then identify a basis for the data which more separates the data. 
+Another tool that can be used to deal with feature vectors is Principal Components Analysis (PCA). PCA quantifies the axis along which maximal variance in the data points occurs. It is possible to identify these axes and a basis which more separates the data. 
 \subsection{Unsupervised classification}
 Unsupervised classification is used in cases where labels are not available. Unsupervised methods include: sequential, hierarchical, hard clustering, fuzzy clustering, boundary detection algorithms and ones which perform cost optimization. Each of these methods requires the choice of certain parameters. The optimal values for these parameters are not always easily identifiable. An additional issue with unsupervised classification is identifying the significance of the generated clusters. It is frequently difficult to describe the meaning of the clustering in the context of the data. The significance is highly data-dependent. For instance. clusters of gene expression data has been associated with genes which are involved in the same process (co-expressed). It is unclear what the clusters mean for color spaces. However, when we clustered water pixels exclusively in Project 1, it seemed as if the clusters corresponded to "shadows".
 
@@ -161,7 +161,7 @@ To implement a CNN, we utilized a couple of different C++ libraries which we emb
 \subsubsection{IBM Virtual Computing Lab}
 	Another option available to us was the IBM Virtual Computing Lab. It was called a cloud service and claims had been made that it had GPU compute nodes.  Investigation revealed that it was more similar to NC State's Virtual Computing Lab then Amazon's EC2 service and that it did not have GPU compute nodes available.  It also did not have modern Ubuntu images available, leading to dated library problem similar to the Hydra cluster.  Attempts to update an Ubuntu distribution image to a more recent version simply lead to the image becoming inaccessible (it is generally not advised to do an operating system upgrades via SSH).  In any case, it is not possible for a student user to save a machine image so even if the operating system update had been successful it would have to be done again as soon as the 2 day max reservation expired.  In the end, it was decided that it would be more fruitful simply to run the software on a non-GPU laptop.
 
-\subsubsection{Training Convolutional Neural Networks with a CPU}
+	\subsubsection{Training Convolutional Neural Networks with a CPU}
 
 	The ResNet-inspired CNN was trained for a day and a half on a Thinkpad laptop.  Its segmentations appeared to be random noise, so the network was simplified, reducing both the number of layers and  number of filters in each layer.  This new network was also trained for one and a half days.  However, it also just produced random noise as its segmentation.  As the duration of the project was nearing an end and it seemed probable that an issue with Caffe was causing the problem, it was decided to focus on the TinyCNN based fully connected neural network.  It was trained for an additional 3 days, ultimately delivering a per pixel classification error of 33.9%.
 	\subsection{SVM}
@@ -178,6 +178,8 @@ To implement a CNN, we utilized a couple of different C++ libraries which we emb
 	A general measure that can be gained using the scatter matrices is called $J3=trace{S_w^{-1}S_m}$. Large values of this measure correlate with data which is well clustered and separated.
 	\subsubsection{Principal Components Analysis}
 	Principal Components Analysis (PCA) (also known as the Karhunen-Loeve Transform)is a way to transform data such that it is expressed in terms of the dimensions of greatest variance\cite{Shlens2003pca}. PCA can be used to reduce the redundancy and noise in a dataset. PCA can be performed in a couple of ways: one uses the eigenvectors of the covariance matrix of the variables and the other uses Singular Value Decomposition to identify a basis for the transformation. Ultimately the goal of PCA is to generate mutually uncorrelated sets of variables\cite{theodoridis2009pattern}.
+	\subsection{Unsupervised Clustering}
+	In Project 1 we utilized k-means to cluster data points which were labeled as water pixels. We were hoping that by creating two clusters of water pixels, we might be able to identify river bed. However, it seemed as if k-means identified shadows on the water more consistently.  In this project, we are asked to propose an unsupervised technique. We propose clustering all pixels in an image regardless of their label into one of two clusterings. We used k-means. We also clustered several images into three clusters to see if we could discern water vs. land vs. sky.  
 	
 	
 \section{Results}
@@ -241,6 +243,7 @@ To implement a CNN, we utilized a couple of different C++ libraries which we emb
 	[Describe results of SVM here]
 	
 	\subsection{Detecting and Classifying "Water" vs. "Non-water" Regions}
+	\subsubsection{Scatter Matrices}
 	During Project 1 we were very aware that using RGB as a feature did not lead to highly separable classes. However, even in light of this limitation we were still able to get a per image and per pixel error rate of between .2 and .3 (sometimes even less). Due to time and resource restrictions, we limited our investigation of feature vectors in Project 2 to the gradient and color spaces. 
 	We calculated the scatter matrices for 11 variables: Hue, Saturation, Value, Red, Green, Blue, Y (luminence), Cr and Cb (chrominance) and two variables that describe gradient: Magnitude and Direction. 
 	We calculated the following values for the data:
@@ -277,6 +280,14 @@ To implement a CNN, we utilized a couple of different C++ libraries which we emb
 		\end{tabular}
 		\caption{J3 values for different sets of variables}
 	\end{table}
+	\subsubsection{PCA}
+	Using MATLAB's pca() function we were able to extract the first two principal components for our data. These two components are shown in the figure below.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=.25]{./images/PCA_Analysis.jpg}
+		\caption{The two principal components identified using MATLAB's pca()}
+	\end{figure}
+	The figure shows that these two components are highly uncorrelated. MATLAB indicated that 49.9\% of the variance in the data was explained by the first principal component, while 17.8\% of the variance was explained by the second component. 
 
 
 \section{Discussion}
