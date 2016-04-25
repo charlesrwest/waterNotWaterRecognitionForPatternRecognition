@@ -15,10 +15,11 @@ moc_*
 Doxyfile
 tempFile902e809843
 .directory
-ui_*
+ui_*s
 .directory
 /data/*
 /output/*
 /proj02_report/*.aux
 /proj02_report/*.log
 /proj02_report/*.pdf
+svmOutput.txt
