@@ -166,7 +166,16 @@ To implement a CNN, we utilized a couple of different C++ libraries which we emb
 	The ResNet-inspired CNN was trained for a day and a half on a Thinkpad laptop.  Its segmentations appeared to be random noise, so the network was simplified, reducing both the number of layers and  number of filters in each layer.  This new network was also trained for one and a half days.  However, it also just produced random noise as its segmentation.  As the duration of the project was nearing an end and it seemed probable that an issue with Caffe was causing the problem, it was decided to focus on the TinyCNN based fully connected neural network.  It was trained for an additional 3 days, ultimately delivering a per pixel classification error of 33.9%.
 	\subsection{SVM}
 	\subsubsection{Parameter Choice} In the case of using SVM on linearly non-separable data, we played with a parameter, C, which related to the extent of wrongly categorized data points (this parameter when set to 0 assumes linearly separable data).\\
-	The parameters we tuned when using radial basis functions were C and $\gamma$. These parameters correlated to missed error points and ?????.  We ranged C from 99 to 99 and $\gamma$ from 99 to 99.
+	The parameters we tuned when using radial basis functions were C and $\gamma$. 
+The lower the C parameter, the smoother the decision line surface. A high value for C tries to classify all training examples
+correctly by allowing more training samples to be selected as support vectors. This makes the decision line much less smooth. It should
+be noted that a higher C value is correlated with a higher computational time. 
+The other parameter associated with the RBF kernel is gamma. The classification was very sensitive to gamma. Setting gamma to a value too small, does 
+not capture the shape of the data, making it more difficult to become linearly seperable when the data is projected to a lower dimension. 
+Smaller values of gamma allow for linear seperability. If a model is too smooth, which may correspond to low values of gamma, and possibly increase in 
+mis-predictions C may be increased to improve the data's complexity and shape. 
+For this project C and gamma were varied on a logarithmic scale from 10^-5 to 10^5 as a way to decide on the optimal parameters for accurate classification.
+
 	\subsubsection{Implementation}
 	We implemented the SVM using OpenCV's SVM functions. We ran the SVM using a linear classifier with parameters set for a linearly non-separable dataset. We also tested SVM using radial basis functions which assume non-linearly separable classes. 
 	\subsection{Detecting and Classifying "Water" vs. "Non-water" Regions}

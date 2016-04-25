@@ -22,4 +22,7 @@ ui_*s
 /proj02_report/*.aux
 /proj02_report/*.log
 /proj02_report/*.pdf
+/proj02_report/*.b*
+proj02_report/*.synctex.gz
+
 svmOutput.txt
