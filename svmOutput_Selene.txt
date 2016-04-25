@@ -125,3 +125,69 @@ Classifier SVMClassifier has classification error 0.700000 and per pixel error 0
 Elasped time is 234.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.300000 and per pixel error 0.213027
 10.000000, 10000.000000
  Total Pixels 2500 ************ RBF classifier: params.C: 10 gamma: 10000
+Classifier SVMClassifier has classification error 0.800000 and per pixel error 0.320272
+Elasped time is 273.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.150000 and per pixel error 0.208852
+10.000000, 100000.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: 10 gamma: 100000
+Classifier SVMClassifier has classification error 0.800000 and per pixel error 0.363138
+Elasped time is 100.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.200000 and per pixel error 0.165990
+100.000000, 0.000100
+ Total Pixels 2500 ************ RBF classifier: params.C: 100 gamma: 0.0001
+Classifier SVMClassifier has classification error 0.750000 and per pixel error 0.564876
+Elasped time is 260.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.150000 and per pixel error 0.192778
+100.000000, 0.001000
+ Total Pixels 2500 ************ RBF classifier: params.C: 100 gamma: 0.001
+Classifier SVMClassifier has classification error 0.550000 and per pixel error 0.581425
+Elasped time is 286.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.050000 and per pixel error 0.210574
+100.000000, 0.010000
+ Total Pixels 2500 ************ RBF classifier: params.C: 100 gamma: 0.01
+Classifier SVMClassifier has classification error 0.750000 and per pixel error 0.551057
+Elasped time is 294.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.300000 and per pixel error 0.199407
+100.000000, 0.100000
+ Total Pixels 2500 ************ RBF classifier: params.C: 100 gamma: 0.1
+Classifier SVMClassifier has classification error 0.650000 and per pixel error 0.741641
+Elasped time is 302.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.450000 and per pixel error 0.227943
+-0.000000, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: -7.68023e-08 gamma: 4.56137e-41
+Classifier perPixelBayesianClassifier has classification error 0.250000 and per pixel error 0.237845
+-15508118295252538753024.000000, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: -1.55081e+22 gamma: 4.58239e-41
+Classifier perPixelBayesianClassifier has classification error 0.300000 and per pixel error 0.219227
+-0.000000, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: -6.91945e-16 gamma: 4.58505e-41
+Classifier perPixelBayesianClassifier has classification error 0.300000 and per pixel error 0.196968
+-0.000000, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: -7.37178e-31 gamma: 4.58785e-41
+Classifier perPixelBayesianClassifier has classification error 0.300000 and per pixel error 0.193357
+0.000001, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: 1.45741e-06 gamma: 4.56585e-41
+Classifier SVMClassifier has classification error 0.600000 and per pixel error 0.254407
+Elasped time is 280.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.200000 and per pixel error 0.222315
+-249624701511643543855868749945575047168.000000, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: -2.49625e+38 gamma: 4.57398e-41
+Classifier perPixelBayesianClassifier has classification error 0.100000 and per pixel error 0.167579
+27457760832822181888.000000, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: 2.74578e+19 gamma: 4.57706e-41
+Classifier SVMClassifier has classification error 0.600000 and per pixel error 0.267700
+Elasped time is 120.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.400000 and per pixel error 0.260348
+1484031377634960305126596027613184.000000, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: 1.48403e+33 gamma: 4.57328e-41
+Classifier SVMClassifier has classification error 0.800000 and per pixel error 0.402812
+Elasped time is 129.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.300000 and per pixel error 0.193500
+-3672660508672.000000, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: -3.67266e+12 gamma: 4.58827e-41
+Classifier perPixelBayesianClassifier has classification error 0.250000 and per pixel error 0.185328
+0.000000, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: 2.44033e-36 gamma: 4.57818e-41
+Classifier SVMClassifier has classification error 0.700000 and per pixel error 0.295568
+Elasped time is 273.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.100000 and per pixel error 0.212889
+0.000000, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: 1.16992e-24 gamma: 4.56613e-41
+Classifier SVMClassifier has classification error 0.800000 and per pixel error 0.362145
+Elasped time is 281.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.300000 and per pixel error 0.258083
+10698960924721454322796963079747796992.000000, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: 1.0699e+37 gamma: 4.57019e-41
+Classifier SVMClassifier has classification error 0.900000 and per pixel error 0.403916
+Elasped time is 113.00 seconds.Classifier perPixelBayesianClassifier has classification error 0.300000 and per pixel error 0.194014
+0.210170, 0.000000
+ Total Pixels 2500 ************ RBF classifier: params.C: 0.21017 gamma: 4.56319e-41
