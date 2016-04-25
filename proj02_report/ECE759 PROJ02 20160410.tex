@@ -182,6 +182,7 @@ mis-predictions C may be increased to improve the data's complexity and shape.
 For this project C and gamma were varied on a logarithmic scale from $10^{-5}$ to $10^5$ as a way to decide on the optimal parameters for accurate classification.
 
 	\subsubsection{Implementation}
+<<<<<<< HEAD
 	We implemented the SVM using OpenCV's SVM functions. We ran the SVM using a linear classifier with parameters set for a linearly non-separable dataset. We also tested SVM using radial basis functions which assume non-linearly separable classes.\\
 	\\ 
 	OpenCV is an open sourced library of functions available in C, C++, python and java. The library we used to implement the SVM was the machine learning library using C++. Overall opencv is a great tool, with wonderful documentation although the
@@ -190,6 +191,15 @@ For this project C and gamma were varied on a logarithmic scale from $10^{-5}$ t
 	Three features were extracted from each pixel of an the training images. The features were blue, green and red values between 0 and 255. The feature vectors were
 	converted into floating point numbers in order to be used to train the SVM. The order of
 	the images were shuffled randomly each time the SVM was run in order to have valid results. 
+=======
+	OpenCV is an open sourced library of functions available in C, C++, python and java. The library we used to implement the SVM was the machine learning library using C++. Overall opencv is a great tool, with wonderful documentation although the 
+learning curve on using such tools is steep for someone using them for the first time. OpenCV requires a set of training samples which were provided as a set of images that accompanied the orignal water and not water photos. For every image in the training set, there was a bitmask image equivalent which darkened the water. These helped us provide labels for each pixel
+in the training data which was given to the SVM. 
+	We implemented the SVM using OpenCV's SVM functions. We ran the SVM using a linear classifier with parameters set for a linearly non-separable dataset. We also tested SVM using radial basis functions which assume non-linearly separable classes. 
+	Three features were extracted from each pixel of an the training images. The features were blue, green and red values between 0 and 255. The feature vectors were 
+converted into floating point numbers in order to be used to train the SVM. Due to the large number of pixels these images had in their current resolution, the training process hours.  The order of 
+the images were shuffled randomly each time the SVM was run in order to have valid results. 
+>>>>>>> 6d607c3bd9f111e20b0096b1f0dc5451ad9fff57
 	\subsection{Detecting and Classifying "Water" vs. "Non-water" Regions}
 	\subsubsection{Features Chosen}
 	All work on features was performed in MATLAB, in some cases in the IBM Virtual Computing Lab. We had only the Image Processing toolbox available. For this reason, we focused on color spaces and gradient. In Project 1 we focused exclusively on the RGB ("Red/Green/Blue") color space. We decided to see if other color spaces could provide additional useful information. We also decided to include the magitude and direction of the gradient. Since areas of water generally don't have a lot of edges, we hoped that this would help identify water. Color spaces used were RGB, HSV (Hue/Saturation/Value) and YCbCr which provides luminance (Y) and chrominance (Cb and Cr) information.\\
@@ -207,8 +217,8 @@ For this project C and gamma were varied on a logarithmic scale from $10^{-5}$ t
 \section{Results}
 	\subsection{Neural Networks}
 	Ultimately, the neural network solution did not offer as high accuracy as the per pixel Bayesian classifier, despite looking at 5x5 patches rather than just single pixels.  There are several possible causes for this.  The most probably is that the network used was just too small.  The initial layer was only 75 nodes, which translates to only really being able to look at 75 features of the data.  In contrast, the per pixel classifier was able to look at the 255*255*255 different possible colors of the pixel and make decisions based on its specific shade.  Even if the network was able to just focus on the middle pixel, it would not be able to notice as fine grain details as the Bayesian classifier.  While the obvious solution would be to increase the size of the network, there is a quadratic slowdown in the training speed as the number of nodes per layer is increased.  Given the amount of time that it takes the network to process a single image, that makes significantly increasing the network size difficult.  GPU acceleration would get around this issue, but does not seem to be an option at this time.
-
-\begin{figure}
+\newpage
+\begin{figure}[h]
 \begin{subfigure}{.33\textwidth}
   \centering
   \includegraphics[width=.9\linewidth]{./images/sourceImages/9731928435_8f83f7253e.png}
@@ -258,18 +268,35 @@ For this project C and gamma were varied on a logarithmic scale from $10^{-5}$ t
 \end{subfigure}%
 
 \end{figure}
-
 	While the per pixel Bayesian classifier outperformed the neural network classifier, there are some interesting differences between their output.  In general, the neural network classifier was much more consistent in its choices due to looking at multiple pixels in the image.  It also tended to deal better with reflections.  That said, it had trouble telling the difference between water and sky and still only examined a small portion of the scene.  Overall, the neural network approach appears to have significant promise (particularly if it is possible to adapt the lower levels of a professional convolutional network), but technical limitations made it difficult to realize that potential in the context of this project.
-
+	\newpage
 	\subsection{SVM}
-	Due to technical difficulties with the SVM code, we were unable to get visual output for this classification algorithm. We were able to attain error rates as low as .24. It is unclear for what value sof C and $\gamma$ this value was attained. Unfortunately, further testing showed that for a given set of parameter values for C and $\gama$, wide variations in the error were attained. In some cases, we were getting an error rate of greater than 50\%. We believe this is because of the way in which we passed the training data. We had to pass it 2500 pixels at a time. We decided to attempt to shrink the images to see if we could pass it a higher proportion of an image. However, we were unable to attain results from this fix.  \\
-	\\
-	While we attained an error rate using SVM that was less than either Bayes or CNN, we do not feel that our implementation of SVM was able to provide increased accuracy consistently. 
+
+Overall SVM performed worse then convolutional nueral networks, and Baye's theorem. Surprisingly the Linear seperator, with a parameter C did better than the radial basis function. The classification results increased in accuracy up to C = 1000 with an error rate from .37 to .42 from several runs for the linear separator, then later reached diminishing returns for any values higher than that. Computationally, it should be noted that the linear classifier took half the amount of time to train and run than the radial basis function. Below are some pictures which describe the changes: 
+\begin{figure}[h]
+\centering
+\begin{subfigure}{.33\textwidth}
+	  \includegraphics[width=.9\linewidth]{./images/svm/bayvSvm.png}
+	  \caption{Baye's Classifier}
+	\end{subfigure}%
+	
+\begin{subfigure}{.33\textwidth}
+	  \includegraphics[width=.9\linewidth]{./images/svm/rbf.png}
+	  \caption{SVM using RBF for a kernel}
+	\end{subfigure}%
+	
+\begin{subfigure}{.33\textwidth}
+	  \includegraphics[width=.9\linewidth]{./images/svm/linearSvm.png}
+	  \caption{Non linear SVM}
+	\end{subfigure}%
+	\end{figure}	
 	
 	\subsection{Detecting and Classifying "Water" vs. "Non-water" Regions}
 	\subsubsection{Scatter Matrices}
-	During Project 1 we were very aware that using RGB as a feature did not lead to highly separable classes. However, even in light of this limitation we were still able to get a per image and per pixel error rate of between .2 and .3 (sometimes even less). Due to time and resource restrictions, we limited our investigation of feature vectors in Project 2 to the gradient and color spaces. 
-	We calculated the scatter matrices for 11 variables: Hue, Saturation, Value, Red, Green, Blue, Y (luminence), Cr and Cb (chrominance) and two variables that describe gradient: Magnitude and Direction. 
+	During Project 1 we were very aware that using RGB as a feature did not lead to highly separable classes. However, even in light of this limitation we were still able to get a per image and per pixel error rate of between .2 and .3 (sometimes even less). Due to time and resource restrictions, we limited our investigation of feature vectors in Project 2 to the gradient and color spaces.\\
+	\\ 
+	We calculated the scatter matrices for 11 variables: Hue, Saturation, Value, Red, Green, Blue, Y (luminence), Cr and Cb (chrominance) and two variables that describe gradient: Magnitude and Direction. \\
+	\\
 	We calculated the following values for the data:
 	\begin{table}[h]
 		\centering
@@ -285,6 +312,7 @@ For this project C and gamma were varied on a logarithmic scale from $10^{-5}$ t
 		\caption{Measures on 11 Data Variables}
 	\end{table}
 	For comparison, I refer to the results from Homework 4 in which we calculated the scatter matrices and J3 value on synthetic data in which the clusters were tightly bound situated far from each other. In this case, we got a J3 value of $9.7753 \times 10^3$. While this value comes from idealized data, it is safe to say that our J3 value suggests that we do not have cohesive and separated clusters.\\
+\\
 	We compared combinations of data to see how the J3 value changed depending on which variables we kept. The table below shows the results:\\
 	\begin{table}[h]
 		\centering
@@ -312,11 +340,12 @@ For this project C and gamma were varied on a logarithmic scale from $10^{-5}$ t
 		\caption{The two principal components identified using MATLAB's pca()}
 	\end{figure}
 	The figure shows that these two components are highly uncorrelated. MATLAB indicated that 49.9\% of the variance in the data was explained by the first principal component, while 17.8\% of the variance was explained by the second component. 
-	\subsection{Unsupervised Cluster}
+	\subsection{Unsupervised Clustering}
 	We chose to run k-means with k = 2 and k = 3 so that images were segmented into 2 or 3 partitions using the dissimilarity metric Euclidean distance. While it would be ideal if 2 clusters ended up being water and not water for two clusters. In general this did not happen.  Increasing k to 3 did not segment images into water, land and sky as hoped.  In fact in some ways the 3 clusters were less meaningful than than two clusters since in the case of two clusters, water was usually delineated, but was clustered with additional objects in the image.\\
+	\\
 	We show the output for one image of the effect of clustering into 2 and 3 clusters.\\
 	
-	\begin{figure}
+	\begin{figure}[h]
 	\begin{subfigure}{.33\textwidth}
 	  \centering
 	  \includegraphics[width=.9\linewidth]{./images/clustering/9731928435_8f83f7253e.png}
@@ -343,6 +372,8 @@ In this Project we explored other classification algorithms and compared them to
 In general even though our classification problem is a highly non-linear one, the Bayes classifier did better. However, we surmise that getting more training data and/or tweaking the CNN has the potential to generate better results.\\
 \\
 We also discovered that clustering the data in the images using Euclidean distance was not sufficient to identify water vs. non-water pixels. Particularly increasing the number of clusters to 3 to not see a huge improvement.
+For the SVM the largest limitation was how long it took to train the data. One interesting idea would be to shrink the images down, and run the SVM. 
+In most classifiers including Baye's the brightness of the sky was often confused with the reflective water pixels. One idea to help with differentiating between the two would be to assign more weights to the water pixels in the training data that were less reflective. 
 \newpage
 \bibliographystyle{plain}
 % --------------------------------------------------------------
